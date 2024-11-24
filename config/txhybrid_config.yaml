@@ -1,42 +1,176 @@
-# analysis_config.yaml
+# txhybid_config.yaml
 
-input_file: ${ALL_HYBRID}  # Use the environment variable
+input_file: ${ALL_HYBRID}
 tree_name: "taTree"
 output_dir: "/home/zane/software/new_analysis/txHybridDF/results"
 
 # Detector settings
 detector: "mdtax4"
-detector_ids:
-  mdtax4: 7
-  brtax4: 8
 fit_ids:
   mdtax4: 6
   brtax4: 7
 
-# Cuts (filtering conditions)
-cuts:
-  - "xm > 500"
-
 # New columns to define
 new_columns:
-  - name: "xm"
-    expression: "prfc.xm[7]"
-  - name: "xlow"
-    expression: "prfc.dep[7][0]"
-  - name: "xhigh"
-    expression: "prfc.dep[7][0]"
+  - name: "Xmax"
+    expression: "prfc.xm[{profile_fit_index}]"
+    init: True
+
+  - name: "Xlow"
+    expression: "prfc.dep[{profile_fit_index}][0]"
+    init: True
+
+  - name: "Xhigh"
+    expression: "prfc.dep[{profile_fit_index}][prfc.nbin[{profile_fit_index}]-1]"
+    init: True
+
+  - name: "LogEnergy"
+    expression: "18. + TMath::Log10(prfc.eng[{profile_fit_index}])"
+    init: True
+
+  - name: "Zenith"
+    expression: "TMath::RadToDeg()*hctim.mthe[{profile_fit_index}]"
+    init: True
+
+  - name: "Psi"
+    expression: "TMath::RadToDeg()*hctim.mpsi[{profile_fit_index}]"
+    init: True
+
+  - name: "PulseArea"
+    expression: "tlfptn.pulsa"
+    init: True
+
+  - name: "TriggeredSDCount"
+    expression: "tlfptn.nhits"
+    init: True
+
+  - name: "GeometryFitStatus"
+    expression: "hctim.failmode[{profile_fit_index}]"
+    init: True
+
+  - name: "ProfileFitStatus"
+    expression: "prfc.failmode[{profile_fit_index}]"
+    init: True
+
+  - name: "GeometryFitQuality"
+    expression: "hctim.mchi2[{profile_fit_index}] / (prfc.nbin[{profile_fit_index}] - 2)"
+    init: True
+
+  - name: "ProfileFitQuality"
+    expression: "prfc.chi2[{profile_fit_index}] / prfc.ndf[{profile_fit_index}]"
+    init: True
+
+  - name: "CoreXXYY"
+    expression: "tlfptn.xxyy[{hit_sd_index}]"
+    init: False
+
+# Event Selection Criteria
+cuts:
+  - "Xmax > Xlow"
+  - "Xmax < Xhigh"
+  - "LogEnergy >= 18.5"
+  - "Zenith <= 65."
+  - "Psi <= 145."
+  - "ProfileFitStatus == 0"
+  - "ProfileFitQuality <= 25"
+  - "GeometryFitStatus == 0"
+  - "GeometryFitQuality <= 15"
 
 # Histogram parameters
 hist_params:
-  - column: "xm"
-    bins: 50
+  - name: "hXmax"
+    title: "X_{max}"
+    style: "histogram"
+    column: "Xmax"
+    bins: 20
+    min: 300
+    max: 1400
+    x_title: "X_{max} [g/cm^{2}]"
+    y_title: "Events"
+    options: ~
+
+  - name: "hXlow"
+    title: "X_{low}"
+    style: "histogram"
+    column: "Xlow"
+    bins: 18
+    min: 0
+    max: 900
+    x_title: "X_{low} [g/cm^{2}]"
+    y_title: "Events"
+    options: ~
+
+  - name: "hXhigh"
+    title: "X_{high}"
+    style: "histogram"
+    column: "Xhigh"
+    bins: 24
     min: 300
     max: 1500
-  - column: "xlow"
-    bins: 108
-    min: 300
-    max: 3000
-  - column: "xhigh"
-    bins: 108
-    min: 300
-    max: 3000
+    x_title: "X_{high} [g/cm^{2}]"
+    y_title: "Events"
+    options: ~
+
+  - name: "hLogEnergy"
+    title: "Energy"
+    style: "histogram"
+    column: "LogEnergy"
+    bins: 15
+    min: 18.5
+    max: 21.5
+    x_title: "log(E/eV)"
+    y_title: "Events"
+    options: ~
+
+  - name: "hZenith"
+    title: "Zenith"
+    style: "histogram"
+    column: "Zenith"
+    bins: 9
+    min: 0
+    max: 90
+    x_title: "Zenith [deg]"
+    y_title: "Events"
+    options: ~
+
+  - name: "hPsi"
+    title: "Psi"
+    style: "histogram"
+    column: "Psi"
+    bins: 18
+    min: 0
+    max: 180
+    x_title: "Psi [deg]"
+    y_title: "Events"
+    options:
+
+  - name: "pXmaxEnergy"
+    title: "#LTX_{max}#GT vs. Energy"
+    style: "profile_plot"
+    x_column: "LogEnergy"
+    y_column: "Xmax"
+    x_bins: 5
+    y_bins: ~
+    x_min: ~
+    x_max: ~
+    x_bin_edges:
+      - 18.5
+      - 18.75
+      - 19.0
+      - 19.25
+      - 19.8
+      - 20.3
+    y_min: 400
+    y_max: 1200
+    x_title: "log(E/eV)"
+    y_title: "#LTX_{max}#GT [g/cm^{2}]"
+    options: ""
+
+user_functions:
+  - name: "Get Hit SD Index"
+    callable: "get_hit_sd_index"
+    args:
+      - name: "column1"
+        value: "PulseArea"
+  - name: "Say Hello"
+    callable: "print_hello"
