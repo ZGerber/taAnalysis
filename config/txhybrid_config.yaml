@@ -1,0 +1,42 @@
+# analysis_config.yaml
+
+input_file: ${ALL_HYBRID}  # Use the environment variable
+tree_name: "taTree"
+output_dir: "/home/zane/software/new_analysis/txHybridDF/results"
+
+# Detector settings
+detector: "mdtax4"
+detector_ids:
+  mdtax4: 7
+  brtax4: 8
+fit_ids:
+  mdtax4: 6
+  brtax4: 7
+
+# Cuts (filtering conditions)
+cuts:
+  - "xm > 500"
+
+# New columns to define
+new_columns:
+  - name: "xm"
+    expression: "prfc.xm[7]"
+  - name: "xlow"
+    expression: "prfc.dep[7][0]"
+  - name: "xhigh"
+    expression: "prfc.dep[7][0]"
+
+# Histogram parameters
+hist_params:
+  - column: "xm"
+    bins: 50
+    min: 300
+    max: 1500
+  - column: "xlow"
+    bins: 108
+    min: 300
+    max: 3000
+  - column: "xhigh"
+    bins: 108
+    min: 300
+    max: 3000

@@ -1,32 +1,36 @@
+from example_analysis import *
+
 import dstpy as dst
 import logging
-from typing import List, Dict
-import config
-from example_analysis import *
 import os
+import yaml
+from typing import List, Dict
 
-# Setting up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class DataFrameAnalyzer:
-    def __init__(self, input_file: str, tree_name: str):
+    def __init__(self, config_file: str):
         """
-        Initializes the DataFrameAnalyzer with the given ROOT file and tree.
+        Initializes the DataFrameAnalyzer with configurations from a YAML file.
 
-        :param input_file: Path to the ROOT file.
-        :param tree_name: Name of the ROOT tree.
+        :param config_file: Path to the YAML configuration file.
         """
-        self.input_file = input_file
-        self.tree_name = tree_name
+        self.config = self._load_config(config_file)
+        self.input_file = self.config.get('input_file', os.environ.get('ALL_HYBRID'))  # Default to environment variable
+        self.tree_name = self.config.get('tree_name', 'taTree')
         self.df = self._load_dataframe()
         logger.info(f"DataFrame for tree {self.tree_name} loaded successfully.")
 
+    @staticmethod
+    def _load_config(config_file: str) -> Dict:
+        """Load the YAML configuration file."""
+        with open(config_file, 'r') as file:
+            return yaml.safe_load(file)
+
     def _load_dataframe(self) -> dst.ROOT.RDataFrame:
         """Load the ROOT TTree into a RDataFrame."""
-        # file = ROOT.TFile(self.input_file)
-        # tree = file.Get(self.tree_name)
         return dst.ROOT.RDataFrame(self.tree_name, self.input_file)
 
     def apply_selection(self, selection: str) -> 'DataFrameAnalyzer':
@@ -40,42 +44,31 @@ class DataFrameAnalyzer:
         self.df = self.df.Filter(selection)
         return self
 
-    def define_new_column(self, name: str, expression: str) -> 'DataFrameAnalyzer':
+    def define_new_column(self, column_info: Dict) -> 'DataFrameAnalyzer':
         """
-        Define a new column in the RDataFrame, selecting the appropriate index based on the detector.
+        Define a new column in the RDataFrame.
 
-        :param name: The name of the new column.
-        :param expression: The expression to calculate the new column values.
+        :param column_info: Dictionary containing column name and expression.
         :return: Self for chaining.
         """
-        # Detector ID logic based on the "stpln.eyeid" leaf
-        # Assuming that only one element of the vector is non-zero
-        # self.df = self.df.Define("detector_id",
-        #                          "stpln.eyeid[0] > 0 ? 0 : (stpln.eyeid[1] > 0 ? 1 : (stpln.eyeid[2] > 0 ? 2 : ("
-        #                          "stpln.eyeid[3] > 0 ? 3 : (stpln.eyeid[4] > 0 ? 4 : (stpln.eyeid[5] > 0 ? 5 : ("
-        #                          "stpln.eyeid[6] > 0 ? 6 : 7)))))))")
-        #
-        # new_name = f"detector_{name}"
-        new_name = name
-        logger.info(f"Defining new column: {new_name} with expression: {expression}")
-
-        self.df = self.df.Define(new_name, expression)
-        self.df.Describe()
-        # self.df = self.df.Define("test_column", "1")
+        col = column_info
+        name = col['name']
+        expression = col['expression']
+        logger.info(f"Defining new column: {name} with expression: {expression}")
+        self.df = self.df.Define(name, expression)
         return self
 
-    def create_histogram(self, column_name: str, bins: int, min_val: float, max_val: float) -> dst.ROOT.TH1F:
+    def create_histogram(self, histogram_info: Dict) -> dst.ROOT.TH1F:
         """
         Create a histogram for a given column in the dataframe.
-
-        :param column_name: The column name to use for histogram binning.
-        :param bins: Number of histogram bins.
-        :param min_val: Minimum value of the histogram range.
-        :param max_val: Maximum value of the histogram range.
-        :return: A ROOT histogram object.
+        :param histogram_info: Dictionary containing histogram parameters.
         """
-        logger.info(f"Creating histogram for column: {column_name}")
-        histogram = self.df.Histo1D((column_name, column_name, bins, min_val, max_val), column_name)
+        hist = histogram_info
+        logger.info(f"Creating histogram for column: {hist['column']}")
+        histogram = self.df.Histo1D((hist['name'], hist['title'], hist['bins'], hist['min'], hist['max']),
+                                    hist['column'])
+        histogram.SetXTitle(hist['x_title'])
+        histogram.SetYTitle(hist['y_title'])
         return histogram.GetPtr()
 
     @staticmethod
@@ -91,13 +84,14 @@ class DataFrameAnalyzer:
             histogram.Write()  # Write the histogram to the ROOT file
         logger.info(f"Histogram saved successfully to {output_file}")
 
-    def save_histograms(self, histograms: List[dst.ROOT.TH1F], output_dir: str) -> None:
+    def save_histograms(self, histograms: List[dst.ROOT.TH1F]) -> None:
         """
         Save each histogram to a separate ROOT file in the specified directory.
 
         :param histograms: List of histograms to be saved.
         :param output_dir: Directory where individual ROOT files will be saved.
         """
+        output_dir = self.config.get('output_dir', './')
         logger.info(f"Saving histograms to individual files in directory: {output_dir}")
         os.makedirs(output_dir, exist_ok=True)
         for hist in histograms:
@@ -105,17 +99,20 @@ class DataFrameAnalyzer:
             output_file = f"{output_dir}/{hist.GetName()}.root"
             self.save_histogram(hist, output_file)
 
-    def run_analysis(self, selections: List[str], new_columns: List[Dict], hist_params: List[Dict]) -> List[dst.ROOT.TH1F]:
+    def run_analysis(self) -> List[dst.ROOT.TH1F]:
         """
         Run the full analysis: apply selections, define new columns, and create histograms.
 
-        :param selections: List of selection strings.
-        :param new_columns: List of dictionaries containing column names and expressions.
-        :param hist_params: List of histogram parameter dictionaries.
+        :return: List of histograms generated from the analysis.
         """
-        # Define new columns (dynamically determined based on the detector)
+        # Extract configuration details
+        selections = self.config.get('cuts', [])
+        new_columns = self.config.get('new_columns', [])
+        hist_params = self.config.get('hist_params', [])
+
+        # Define new columns
         for col in new_columns:
-            self.define_new_column(col['name'], col['expression'])
+            self.define_new_column(col)
 
         # Apply selections
         for selection in selections:
@@ -124,14 +121,12 @@ class DataFrameAnalyzer:
         # Create histograms
         histograms = []
         for hist in hist_params:
-            histograms.append(self.create_histogram(hist['column'], hist['bins'], hist['min'], hist['max']))
+            histograms.append(self.create_histogram(hist))
 
-        # Store histograms or plot them here
         logger.info("Analysis complete.")
         return histograms
 
 
-# Function to show histograms in a canvas (if needed)
 def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
     """
     Plot histograms on a ROOT canvas.
@@ -141,15 +136,10 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
     canvas = dst.ROOT.TCanvas("canvas", "Analysis Results", 800, 600)
     for hist in histograms:
         hist.Draw()
-    canvas.Update()
-    input("Press Enter to continue...")
+        canvas.Update()
+        input("Press Enter to continue...")
 
 
 if __name__ == "__main__":
-    input_file = config.INPUT_FILE  # Path to the ROOT file
-    tree_name = config.TREE_NAME
-    output_dir = config.OUTPUT_DIR
-    example_analysis(input_file, tree_name, output_dir)
-
-
-
+    analysis_config = "/home/zane/software/new_analysis/txHybridDF/config/txhybrid_config.yaml"
+    example_analysis(analysis_config)
