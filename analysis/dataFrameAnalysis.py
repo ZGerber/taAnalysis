@@ -65,8 +65,16 @@ class DataFrameAnalyzer:
     @property
     def _profile_fit_index(self) -> int:
         """Get the index of the profile fit parameter."""
-        fit_ids = self.config.get('fit_ids', {})
-        return fit_ids.get(self.detector, -1)
+        try:
+            det = self.detector
+            detectors = self.config.get('detectors', {})
+            for d in detectors:
+                if d['name'] == self.detector:
+                    return d.get('profile', 0)
+        except Exception as e:
+            logger.error(f"Error while getting profile fit index: {str(e)}")
+            return 0
+
 
     def _replace_profile_fit_index_in_expression(self, expression: str) -> str:
         """Replace the placeholder in the expression with the actual profile_fit_index."""
@@ -114,9 +122,14 @@ class DataFrameAnalyzer:
             logger.info(f"Skipping column: {col.get('name', 'N/A')}. No initialization requested.")
             return self
         name = col['name']
-        expression = self._replace_profile_fit_index_in_expression(col['expression'])
+        if isinstance(col['expression'], str):
+            expression = self._replace_profile_fit_index_in_expression(col['expression'])
+            self.df = self.df.Define(name, expression)
+        else:
+            expression = col['expression']
+            self.df = self.df.Define(name, expression)
+
         logger.info(f"Defining new column: {name} with expression: {expression}")
-        self.df = self.df.Define(name, expression)
         return self
 
     def create_histogram(self, histogram_info: Dict) -> dst.ROOT.TH1F:
@@ -172,10 +185,9 @@ class DataFrameAnalyzer:
         :param histogram: The histogram to be saved.
         :param output_file: The name of the output ROOT file.
         """
-        logger.info(f"Saving histogram to {output_file}")
         with dst.ROOT.TFile(output_file, "RECREATE") as root_file:
             histogram.Write()  # Write the histogram to the ROOT file
-        # logger.info(f"Histogram saved!")
+        logger.info(f"Saved histogram to {output_file}")
 
     def save_histograms(self, histograms: List[dst.ROOT.TH1F]) -> None:
         """
@@ -228,10 +240,14 @@ class DataFrameAnalyzer:
                 func = getattr(user_func_instance, func_call)
                 logger.info(f"Running user function: {func_name} with arguments: {[arg['value'] for arg in func_args]}")
 
+                # logger.debug(f"{[arg for arg in column_data if arg in column_data]}")
                 # Pass the arguments as numpy arrays
                 results = func(*[column_data[arg['value']] for arg in func_args if arg['value'] in column_data])
 
                 logger.debug(f"{func_name} results: {results}")
+
+                # for result in results:
+                #     self.define_new_column(result)
 
         # Apply selections
         for selection in selections:
@@ -239,8 +255,8 @@ class DataFrameAnalyzer:
 
         # Create histograms
         histogram_list = []
-        # for hist in hist_params:
-        #     histogram_list.append(self.create_histogram(hist))
+        for hist in hist_params:
+            histogram_list.append(self.create_histogram(hist))
 
         logger.info("ANALYSIS COMPLETE!")
         return histogram_list
@@ -268,6 +284,6 @@ if __name__ == "__main__":
 
     my_histograms = analyzer.run_analysis()
 
-    # analyzer.save_histograms(my_histograms)
+    analyzer.save_histograms(my_histograms)
 
-    # plot_histograms(my_histograms)
+    plot_histograms(my_histograms)

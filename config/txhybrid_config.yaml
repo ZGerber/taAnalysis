@@ -6,9 +6,13 @@ output_dir: "/home/zane/software/new_analysis/txHybridDF/results"
 
 # Detector settings
 detector: "mdtax4"
-fit_ids:
-  mdtax4: 6
-  brtax4: 7
+detectors:
+  - name: "mdtax4"
+    site_id: 7
+    profile: 6
+  - name: "brtax4"
+    site_id: 8
+    profile: 7
 
 # New columns to define
 new_columns:
@@ -60,9 +64,23 @@ new_columns:
     expression: "prfc.chi2[{profile_fit_index}] / prfc.ndf[{profile_fit_index}]"
     init: True
 
-  - name: "CoreXXYY"
-    expression: "tlfptn.xxyy[{hit_sd_index}]"
-    init: False
+  - name: "HitSDsXXYY"
+    expression: "tlfptn.xxyy"
+    init: True
+
+  - name: "HitSDsCLF"
+    expression: "tlfptn.xyzclf"
+    init: True
+
+
+
+#  - name: "BorderDistance"
+#    expression: "TLUTI_DETECTORS::get_sd_bdist(TAX4SD_208_N, eventVars.sdcorex, eventVars.sdcorey);"
+#    init: True
+
+#  - name: "EyeID"
+#    expression: "stpln.eyeid[{hit_sd_index}]"
+#    init: False
 
 # Event Selection Criteria
 cuts:
@@ -115,8 +133,8 @@ hist_params:
     title: "Energy"
     style: "histogram"
     column: "LogEnergy"
-    bins: 15
-    min: 18.5
+    bins: 14
+    min: 18.0
     max: 21.5
     x_title: "log(E/eV)"
     y_title: "Events"
@@ -167,10 +185,12 @@ hist_params:
     options: ""
 
 user_functions:
-  - name: "Get Hit SD Index"
-    callable: "get_hit_sd_index"
+  - name: "Get Core XXYY"
+    callable: "get_core_xxyy"
     args:
       - name: "column1"
+        value: "HitSDsCLF"
+      - name: "column2"
         value: "PulseArea"
-  - name: "Say Hello"
-    callable: "print_hello"
+#  - name: "Say Hello"
+#    callable: "say_hello"

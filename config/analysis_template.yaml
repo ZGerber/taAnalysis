@@ -1,4 +1,4 @@
-# txhybid_config.yaml
+# example_config.yaml
 
 input_file: "/full/path/to/input_file"
 tree_name: "tree_name"
