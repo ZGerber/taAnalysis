@@ -1,196 +1,186 @@
 # txhybid_config.yaml
 
-input_file: ${ALL_HYBRID}
-tree_name: "taTree"
-output_dir: "/home/zane/software/new_analysis/txHybridDF/results"
+input_file: ${ALL_HYBRID}  # Path to the input ROOT file containing the data.
+tree_name: "taTree"  # Name of the ROOT TTree to be analyzed.
+output_dir: "/home/zane/software/new_analysis/txHybridDF/results"  # Directory to save the output results.
 
 # Detector settings
-detector: "mdtax4"
+detector: "mdtax4"  # Name of the detector to be used in the analysis.
 detectors:
-  - name: "mdtax4"
-    site_id: 7
-    profile: 6
-  - name: "brtax4"
-    site_id: 8
-    profile: 7
+  - name: "mdtax4"  # Name of the first detector.
+    site_id: 7  # Site ID of the first detector.
+    profile: 6  # Profile fit index for the first detector.
+  - name: "brtax4"  # Name of the second detector.
+    site_id: 8  # Site ID of the second detector.
+    profile: 7  # Profile fit index for the second detector.
 
 # New columns to define
 new_columns:
-  - name: "Xmax"
-    expression: "prfc.xm[{profile_fit_index}]"
-    init: True
+  - name: "Xmax"  # Name of the new column.
+    expression: "prfc.xm[{profile_fit_index}]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "Xlow"
-    expression: "prfc.dep[{profile_fit_index}][0]"
-    init: True
+  - name: "Xlow"  # Name of the new column.
+    expression: "prfc.dep[{profile_fit_index}][0]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "Xhigh"
-    expression: "prfc.dep[{profile_fit_index}][prfc.nbin[{profile_fit_index}]-1]"
-    init: True
+  - name: "Xhigh"  # Name of the new column.
+    expression: "prfc.dep[{profile_fit_index}][prfc.nbin[{profile_fit_index}]-1]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "LogEnergy"
-    expression: "18. + TMath::Log10(prfc.eng[{profile_fit_index}])"
-    init: True
+  - name: "LogEnergy"  # Name of the new column.
+    expression: "18. + TMath::Log10(prfc.eng[{profile_fit_index}])"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "Zenith"
-    expression: "TMath::RadToDeg()*hctim.mthe[{profile_fit_index}]"
-    init: True
+  - name: "Zenith"  # Name of the new column.
+    expression: "TMath::RadToDeg()*hctim.mthe[{profile_fit_index}]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "Psi"
-    expression: "TMath::RadToDeg()*hctim.mpsi[{profile_fit_index}]"
-    init: True
+  - name: "Psi"  # Name of the new column.
+    expression: "TMath::RadToDeg()*hctim.mpsi[{profile_fit_index}]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "PulseArea"
-    expression: "tlfptn.pulsa"
-    init: True
+  - name: "PulseArea"  # Name of the new column.
+    expression: "tlfptn.pulsa"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "TriggeredSDCount"
-    expression: "tlfptn.nhits"
-    init: True
+  - name: "TriggeredSDCount"  # Name of the new column.
+    expression: "tlfptn.nhits"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "GeometryFitStatus"
-    expression: "hctim.failmode[{profile_fit_index}]"
-    init: True
+  - name: "GeometryFitStatus"  # Name of the new column.
+    expression: "hctim.failmode[{profile_fit_index}]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "ProfileFitStatus"
-    expression: "prfc.failmode[{profile_fit_index}]"
-    init: True
+  - name: "ProfileFitStatus"  # Name of the new column.
+    expression: "prfc.failmode[{profile_fit_index}]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "GeometryFitQuality"
-    expression: "hctim.mchi2[{profile_fit_index}] / (prfc.nbin[{profile_fit_index}] - 2)"
-    init: True
+  - name: "GeometryFitQuality"  # Name of the new column.
+    expression: "hctim.mchi2[{profile_fit_index}] / (prfc.nbin[{profile_fit_index}] - 2)"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "ProfileFitQuality"
-    expression: "prfc.chi2[{profile_fit_index}] / prfc.ndf[{profile_fit_index}]"
-    init: True
+  - name: "ProfileFitQuality"  # Name of the new column.
+    expression: "prfc.chi2[{profile_fit_index}] / prfc.ndf[{profile_fit_index}]"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "HitSDsXXYY"
-    expression: "tlfptn.xxyy"
-    init: True
+  - name: "HitSDsXXYY"  # Name of the new column.
+    expression: "tlfptn.xxyy"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
-  - name: "HitSDsCLF"
-    expression: "tlfptn.xyzclf"
-    init: True
-
-
-
-#  - name: "BorderDistance"
-#    expression: "TLUTI_DETECTORS::get_sd_bdist(TAX4SD_208_N, eventVars.sdcorex, eventVars.sdcorey);"
-#    init: True
-
-#  - name: "EyeID"
-#    expression: "stpln.eyeid[{hit_sd_index}]"
-#    init: False
+  - name: "HitSDsCLF"  # Name of the new column.
+    expression: "tlfptn.xyzclf"  # Expression to calculate the values of the new column.
+    init: True  # Initialize the column during the analysis process.
 
 # Event Selection Criteria
 cuts:
-  - "Xmax > Xlow"
-  - "Xmax < Xhigh"
-  - "LogEnergy >= 18.5"
-  - "Zenith <= 65."
-  - "Psi <= 145."
-  - "ProfileFitStatus == 0"
-  - "ProfileFitQuality <= 25"
-  - "GeometryFitStatus == 0"
-  - "GeometryFitQuality <= 15"
+  - "Xmax > Xlow"  # Select events where Xmax is greater than Xlow.
+  - "Xmax < Xhigh"  # Select events where Xmax is less than Xhigh.
+  - "LogEnergy >= 18.5"  # Select events where LogEnergy is greater than or equal to 18.5.
+  - "Zenith <= 65."  # Select events where Zenith is less than or equal to 65 degrees.
+  - "Psi <= 145."  # Select events where Psi is less than or equal to 145 degrees.
+  - "ProfileFitStatus == 0"  # Select events where ProfileFitStatus is equal to 0.
+  - "ProfileFitQuality <= 25"  # Select events where ProfileFitQuality is less than or equal to 25.
+  - "GeometryFitStatus == 0"  # Select events where GeometryFitStatus is equal to 0.
+  - "GeometryFitQuality <= 15"  # Select events where GeometryFitQuality is less than or equal to 15.
 
 # Histogram parameters
 hist_params:
-  - name: "hXmax"
-    title: "X_{max}"
-    style: "histogram"
-    column: "Xmax"
-    bins: 20
-    min: 300
-    max: 1400
-    x_title: "X_{max} [g/cm^{2}]"
-    y_title: "Events"
-    options: ~
+  - name: "hXmax"  # Name of the histogram.
+    title: "X_{max}"  # Title of the histogram.
+    style: "histogram"  # Style of the plot (histogram).
+    column: "Xmax"  # Column to be plotted.
+    bins: 20  # Number of bins in the histogram.
+    min: 300  # Minimum value of the histogram.
+    max: 1400  # Maximum value of the histogram.
+    x_title: "X_{max} [g/cm^{2}]"  # X-axis title.
+    y_title: "Events"  # Y-axis title.
+    options: ~  # Additional options for the histogram.
 
-  - name: "hXlow"
-    title: "X_{low}"
-    style: "histogram"
-    column: "Xlow"
-    bins: 18
-    min: 0
-    max: 900
-    x_title: "X_{low} [g/cm^{2}]"
-    y_title: "Events"
-    options: ~
+  - name: "hXlow"  # Name of the histogram.
+    title: "X_{low}"  # Title of the histogram.
+    style: "histogram"  # Style of the plot (histogram).
+    column: "Xlow"  # Column to be plotted.
+    bins: 18  # Number of bins in the histogram.
+    min: 0  # Minimum value of the histogram.
+    max: 900  # Maximum value of the histogram.
+    x_title: "X_{low} [g/cm^{2}]"  # X-axis title.
+    y_title: "Events"  # Y-axis title.
+    options: ~  # Additional options for the histogram.
 
-  - name: "hXhigh"
-    title: "X_{high}"
-    style: "histogram"
-    column: "Xhigh"
-    bins: 24
-    min: 300
-    max: 1500
-    x_title: "X_{high} [g/cm^{2}]"
-    y_title: "Events"
-    options: ~
+  - name: "hXhigh"  # Name of the histogram.
+    title: "X_{high}"  # Title of the histogram.
+    style: "histogram"  # Style of the plot (histogram).
+    column: "Xhigh"  # Column to be plotted.
+    bins: 24  # Number of bins in the histogram.
+    min: 300  # Minimum value of the histogram.
+    max: 1500  # Maximum value of the histogram.
+    x_title: "X_{high} [g/cm^{2}]"  # X-axis title.
+    y_title: "Events"  # Y-axis title.
+    options: ~  # Additional options for the histogram.
 
-  - name: "hLogEnergy"
-    title: "Energy"
-    style: "histogram"
-    column: "LogEnergy"
-    bins: 14
-    min: 18.0
-    max: 21.5
-    x_title: "log(E/eV)"
-    y_title: "Events"
-    options: ~
+  - name: "hLogEnergy"  # Name of the histogram.
+    title: "Energy"  # Title of the histogram.
+    style: "histogram"  # Style of the plot (histogram).
+    column: "LogEnergy"  # Column to be plotted.
+    bins: 14  # Number of bins in the histogram.
+    min: 18.0  # Minimum value of the histogram.
+    max: 21.5  # Maximum value of the histogram.
+    x_title: "log(E/eV)"  # X-axis title.
+    y_title: "Events"  # Y-axis title.
+    options: ~  # Additional options for the histogram.
 
-  - name: "hZenith"
-    title: "Zenith"
-    style: "histogram"
-    column: "Zenith"
-    bins: 9
-    min: 0
-    max: 90
-    x_title: "Zenith [deg]"
-    y_title: "Events"
-    options: ~
+  - name: "hZenith"  # Name of the histogram.
+    title: "Zenith"  # Title of the histogram.
+    style: "histogram"  # Style of the plot (histogram).
+    column: "Zenith"  # Column to be plotted.
+    bins: 9  # Number of bins in the histogram.
+    min: 0  # Minimum value of the histogram.
+    max: 90  # Maximum value of the histogram.
+    x_title: "Zenith [deg]"  # X-axis title.
+    y_title: "Events"  # Y-axis title.
+    options: ~  # Additional options for the histogram.
 
-  - name: "hPsi"
-    title: "Psi"
-    style: "histogram"
-    column: "Psi"
-    bins: 18
-    min: 0
-    max: 180
-    x_title: "Psi [deg]"
-    y_title: "Events"
-    options:
+  - name: "hPsi"  # Name of the histogram.
+    title: "Psi"  # Title of the histogram.
+    style: "histogram"  # Style of the plot (histogram).
+    column: "Psi"  # Column to be plotted.
+    bins: 18  # Number of bins in the histogram.
+    min: 0  # Minimum value of the histogram.
+    max: 180  # Maximum value of the histogram.
+    x_title: "Psi [deg]"  # X-axis title.
+    y_title: "Events"  # Y-axis title.
+    options:  # Additional options for the histogram.
 
-  - name: "pXmaxEnergy"
-    title: "#LTX_{max}#GT vs. Energy"
-    style: "profile_plot"
-    x_column: "LogEnergy"
-    y_column: "Xmax"
-    x_bins: 5
-    y_bins: ~
-    x_min: ~
-    x_max: ~
-    x_bin_edges:
+  - name: "pXmaxEnergy"  # Name of the profile plot.
+    title: "#LTX_{max}#GT vs. Energy"  # Title of the profile plot.
+    style: "profile_plot"  # Style of the plot (profile plot).
+    x_column: "LogEnergy"  # X-axis column.
+    y_column: "Xmax"  # Y-axis column.
+    x_bins: 5  # Number of bins in the x-axis.
+    y_bins: ~  # Number of bins in the y-axis.
+    x_min: ~  # Minimum value of the x-axis.
+    x_max: ~  # Maximum value of the x-axis.
+    x_bin_edges:  # List of bin edges for the x-axis.
       - 18.5
       - 18.75
       - 19.0
       - 19.25
       - 19.8
       - 20.3
-    y_min: 400
-    y_max: 1200
-    x_title: "log(E/eV)"
-    y_title: "#LTX_{max}#GT [g/cm^{2}]"
-    options: ""
+    y_min: 400  # Minimum value of the y-axis.
+    y_max: 1200  # Maximum value of the y-axis.
+    x_title: "log(E/eV)"  # X-axis title.
+    y_title: "#LTX_{max}#GT [g/cm^{2}]"  # Y-axis title.
+    options: ""  # Additional options for the profile plot.
 
 user_functions:
-  - name: "Get Core XXYY"
-    callable: "get_core_xxyy"
+  - name: "Get Core XXYY"  # Name of the user function.
+    callable: "get_core_xxyy"  # Callable function name.
     args:
-      - name: "column1"
-        value: "HitSDsCLF"
-      - name: "column2"
-        value: "PulseArea"
+      - name: "column1"  # Name of the first argument.
+        value: "HitSDsCLF"  # Value of the first argument.
+      - name: "column2"  # Name of the second argument.
+        value: "PulseArea"  # Value of the second argument.
 #  - name: "Say Hello"
 #    callable: "say_hello"

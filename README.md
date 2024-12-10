@@ -59,6 +59,52 @@ To run the analysis, execute the main script with the path to the configuration 
 python analysis/dataFrameAnalysis.py /path/to/config.yaml
 ```
 
+### Detailed Usage Example
+
+Here is a detailed example of how to use the analysis tool:
+
+1. **Prepare the Configuration File**: Create a YAML configuration file with the necessary parameters. For example:
+
+```yaml
+input_file: "/path/to/your/input_file.root"
+tree_name: "yourTreeName"
+output_dir: "/path/to/output_directory"
+
+detector: "yourDetector"
+detectors:
+  - name: "yourDetector"
+    site_id: 1
+    profile: 1
+
+new_columns:
+  - name: "NewColumn"
+    expression: "some_expression"
+    init: True
+
+cuts:
+  - "NewColumn > 100"
+
+hist_params:
+  - name: "histNewColumn"
+    title: "New Column Histogram"
+    style: "histogram"
+    column: "NewColumn"
+    bins: 50
+    min: 0
+    max: 200
+    x_title: "New Column"
+    y_title: "Frequency"
+    options: ~
+```
+
+2. **Run the Analysis**: Execute the main script with the path to your configuration file:
+
+```bash
+python analysis/dataFrameAnalysis.py /path/to/your/config.yaml
+```
+
+3. **View the Results**: The results, including histograms and any other output, will be saved in the specified output directory.
+
 ## Configuration
 
 The analysis is configured through a YAML file. Below is an example configuration:
@@ -100,6 +146,19 @@ hist_params:
     options: ~
 ```
 
+### Configuration Options
+
+The configuration file allows users to specify various parameters for the analysis. Below are detailed explanations of the configuration options:
+
+- **input_file**: Path to the input ROOT file containing the data.
+- **tree_name**: Name of the ROOT TTree to be analyzed.
+- **output_dir**: Directory to save the output results.
+- **detector**: Name of the detector to be used in the analysis.
+- **detectors**: List of detectors with their respective site IDs and profile fit indices.
+- **new_columns**: List of new columns to define in the dataframe.
+- **cuts**: List of event selection criteria.
+- **hist_params**: List of histogram parameters.
+
 ### New Columns
 
 The `new_columns` section in the YAML configuration file allows users to define new columns in the dataframe. Each entry in this section specifies a new column to be created, including its name, the expression used to calculate its values, and whether it should be initialized.
@@ -123,6 +182,39 @@ new_columns:
 - **init**: A boolean value indicating whether the column should be initialized. If `True`, the column will be created during the analysis process. Otherwise it will be created via user-defined functions.
 
 By defining new columns in this section, users can extend the dataframe with additional calculated data, which can then be used in further analysis or visualizations.
+
+### Event Selection Criteria
+
+The `cuts` section in the YAML configuration file allows users to specify event selection criteria. Each entry in this section is a condition that must be met for an event to be included in the analysis.
+
+#### Example
+
+```yaml
+cuts:
+  - "NewColumn1 > 100"
+  - "NewColumn2 < 50"
+```
+
+### Histogram Parameters
+
+The `hist_params` section in the YAML configuration file allows users to specify parameters for creating histograms. Each entry in this section defines a histogram to be created, including its name, title, style, column to be plotted, number of bins, range, axis titles, and additional options.
+
+#### Example
+
+```yaml
+hist_params:
+  - name: "histNewColumn1"
+    title: "New Column 1 Histogram"
+    style: "histogram"
+    column: "NewColumn1"
+    bins: 50
+    min: 0
+    max: 200
+    x_title: "New Column 1"
+    y_title: "Frequency"
+    options: ~
+```
+
 ## User-Defined Functions
 
 Users can create their own functions using the `UserFunctions` class. These functions are used to perform complex calculations on dataframe columns and return data that will be used to fill new columns.

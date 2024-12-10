@@ -10,6 +10,11 @@ from typing import List, Dict, Tuple, Any
 
 
 def setup_logger():
+    """
+    Set up the logger with color formatting.
+
+    :return: Configured logger instance.
+    """
     # Create a logger
     logger = logging.getLogger(__name__)
 
@@ -58,13 +63,22 @@ class DataFrameAnalyzer:
 
     @staticmethod
     def _load_config(config_file: str) -> Dict:
-        """Load the YAML configuration file."""
+        """
+        Load the YAML configuration file.
+
+        :param config_file: Path to the YAML configuration file.
+        :return: Dictionary containing the configuration parameters.
+        """
         with open(config_file, 'r') as file:
             return yaml.safe_load(file)
 
     @property
     def _profile_fit_index(self) -> int:
-        """Get the index of the profile fit parameter."""
+        """
+        Get the index of the profile fit parameter.
+
+        :return: Index of the profile fit parameter.
+        """
         try:
             det = self.detector
             detectors = self.config.get('detectors', {})
@@ -75,13 +89,21 @@ class DataFrameAnalyzer:
             logger.error(f"Error while getting profile fit index: {str(e)}")
             return 0
 
-
     def _replace_profile_fit_index_in_expression(self, expression: str) -> str:
-        """Replace the placeholder in the expression with the actual profile_fit_index."""
+        """
+        Replace the placeholder in the expression with the actual profile_fit_index.
+
+        :param expression: Expression containing the placeholder.
+        :return: Expression with the placeholder replaced by the actual profile_fit_index.
+        """
         return expression.format(profile_fit_index=self._profile_fit_index)
 
     def _load_dataframe(self) -> dst.ROOT.RDataFrame:
-        """Load the ROOT TTree into a RDataFrame."""
+        """
+        Load the ROOT TTree into a RDataFrame.
+
+        :return: RDataFrame containing the data from the ROOT TTree.
+        """
         return dst.ROOT.RDataFrame(self.tree_name, self.input_file)
 
     def prepare_data(self, columns: List[str]) -> Dict[str, np.ndarray]:
@@ -135,7 +157,9 @@ class DataFrameAnalyzer:
     def create_histogram(self, histogram_info: Dict) -> dst.ROOT.TH1F:
         """
         Create a histogram for a given column in the dataframe.
+
         :param histogram_info: Dictionary containing histogram parameters.
+        :return: Created histogram.
         """
         hist = histogram_info
 
@@ -194,7 +218,6 @@ class DataFrameAnalyzer:
         Save each histogram to a separate ROOT file in the specified directory.
 
         :param histograms: List of histograms to be saved.
-        :param output_dir: Directory where individual ROOT files will be saved.
         """
         output_dir = self.config.get('output_dir', './')
         logger.info(f"Saving histograms...")
@@ -278,12 +301,17 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
 if __name__ == "__main__":
     logger = setup_logger()
 
+    # Path to the analysis configuration file
     analysis_config = "/home/zane/software/new_analysis/txHybridDF/config/txhybrid_config.yaml"
 
+    # Initialize the DataFrameAnalyzer with the configuration file
     analyzer = DataFrameAnalyzer(analysis_config)
 
+    # Run the analysis and get the list of histograms
     my_histograms = analyzer.run_analysis()
 
+    # Save the histograms to ROOT files
     analyzer.save_histograms(my_histograms)
 
+    # Plot the histograms on a ROOT canvas
     plot_histograms(my_histograms)
