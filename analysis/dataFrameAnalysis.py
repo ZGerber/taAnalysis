@@ -172,6 +172,8 @@ class DataFrameAnalyzer:
             )
             histogram.SetXTitle(hist['x_title'])
             histogram.SetYTitle(hist['y_title'])
+            if not hist['show_stats']:
+                histogram.SetStats(0)
             return histogram.GetPtr()
 
         elif hist['style'] == 'profile_plot':
@@ -199,6 +201,8 @@ class DataFrameAnalyzer:
 
             histogram.SetXTitle(hist['x_title'])
             histogram.SetYTitle(hist['y_title'])
+            if not hist['show_stats']:
+                histogram.SetStats(0)
             return histogram.GetPtr()
 
     @staticmethod
