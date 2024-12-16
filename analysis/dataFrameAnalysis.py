@@ -7,6 +7,7 @@ import os
 import yaml
 import numpy as np
 from typing import List, Dict, Tuple, Any
+import argparse
 
 
 def setup_logger():
@@ -45,6 +46,17 @@ def setup_logger():
     logger.addHandler(handler)
 
     return logger
+
+
+def parse_arguments():
+    """
+    Parse command-line arguments for the script.
+
+    :return: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Run the DataFrame analysis with a specified YAML configuration file.")
+    parser.add_argument("config_file", type=str, help="Path to the YAML configuration file.")
+    return parser.parse_args()
 
 
 class DataFrameAnalyzer:
@@ -305,11 +317,10 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
 if __name__ == "__main__":
     logger = setup_logger()
 
-    # Path to the analysis configuration file
-    analysis_config = "/home/zane/software/new_analysis/txHybridDF/config/txhybrid_config.yaml"
+    args = parse_arguments()
 
     # Initialize the DataFrameAnalyzer with the configuration file
-    analyzer = DataFrameAnalyzer(analysis_config)
+    analyzer = DataFrameAnalyzer(args.config_file)
 
     # Run the analysis and get the list of histograms
     my_histograms = analyzer.run_analysis()

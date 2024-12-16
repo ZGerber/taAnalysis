@@ -106,6 +106,19 @@ python analysis/dataFrameAnalysis.py /path/to/your/config.yaml
 
 3. **View the Results**: The results, including histograms and any other output, will be saved in the specified output directory.
 
+### Command-Line Options
+
+The script supports the following command-line options:
+
+- `config_file`: Path to the YAML configuration file.
+- `-h` or `--help`: Display the help message.
+
+To display the help message, run:
+
+```bash
+python analysis/dataFrameAnalysis.py -h
+```
+
 ## Configuration
 
 The analysis is configured through a YAML file. Below is an example configuration:
