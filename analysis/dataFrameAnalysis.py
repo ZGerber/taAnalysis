@@ -148,6 +148,10 @@ class DataFrameAnalyzer:
             )
             histogram.SetXTitle(hist['x_title'])
             histogram.SetYTitle(hist['y_title'])
+            if not hist['show_stats']:
+                histogram.SetStats(0)
+            if hist['y_range_user']:
+                histogram.GetYaxis().SetRangeUser(hist['y_range_user'][0], hist['y_range_user'][1])
             return histogram.GetPtr()
 
         elif hist['style'] == 'profile_plot':
@@ -175,6 +179,14 @@ class DataFrameAnalyzer:
 
             histogram.SetXTitle(hist['x_title'])
             histogram.SetYTitle(hist['y_title'])
+            if not hist['show_stats']:
+                histogram.SetStats(0)
+            # if hist['x_range_user']:
+            #     logger.debug(f"Setting x-axis range: {hist['x_range_user']}")
+            #     histogram.GetXaxis().SetRangeUser(int(hist['x_range_user'][0]), int(hist['x_range_user'][1]))
+            # if hist['y_range_user']:
+            #     logger.debug(f"Setting y-axis range: {hist['y_range_user']}")
+            #     histogram.GetYaxis().SetRangeUser(int(hist['y_range_user'][0]), int(hist['y_range_user'][1]))
             return histogram.GetPtr()
 
     @staticmethod
@@ -286,4 +298,4 @@ if __name__ == "__main__":
 
     analyzer.save_histograms(my_histograms)
 
-    plot_histograms(my_histograms)
+    # plot_histograms(my_histograms)

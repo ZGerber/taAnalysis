@@ -105,6 +105,8 @@ hist_params:
     max: 1400
     x_title: "X_{max} [g/cm^{2}]"
     y_title: "Events"
+    show_stats: True
+    y_range_user: ~
     options: ~
 
   - name: "hXlow"
@@ -116,6 +118,8 @@ hist_params:
     max: 900
     x_title: "X_{low} [g/cm^{2}]"
     y_title: "Events"
+    show_stats: True
+    y_range_user: ~
     options: ~
 
   - name: "hXhigh"
@@ -127,6 +131,8 @@ hist_params:
     max: 1500
     x_title: "X_{high} [g/cm^{2}]"
     y_title: "Events"
+    show_stats: True
+    y_range_user: ~
     options: ~
 
   - name: "hLogEnergy"
@@ -138,6 +144,8 @@ hist_params:
     max: 21.5
     x_title: "log(E/eV)"
     y_title: "Events"
+    show_stats: True
+    y_range_user: ~
     options: ~
 
   - name: "hZenith"
@@ -149,7 +157,9 @@ hist_params:
     max: 90
     x_title: "Zenith [deg]"
     y_title: "Events"
-    options: ~
+    show_stats: True
+    y_range_user: ~
+    options: ""
 
   - name: "hPsi"
     title: "Psi"
@@ -160,7 +170,9 @@ hist_params:
     max: 180
     x_title: "Psi [deg]"
     y_title: "Events"
-    options:
+    show_stats: True
+    y_range_user: ~
+    options: ""
 
   - name: "pXmaxEnergy"
     title: "#LTX_{max}#GT vs. Energy"
@@ -182,6 +194,9 @@ hist_params:
     y_max: 1200
     x_title: "log(E/eV)"
     y_title: "#LTX_{max}#GT [g/cm^{2}]"
+    show_stats: True
+    x_range_user: ~
+    y_range_user: 200, 1700
     options: ""
 
 user_functions:
