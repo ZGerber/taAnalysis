@@ -39,7 +39,7 @@ hist_params:
     max: # max value
     x_title: "X label with [units]"
     y_title: "Y label with [units]"
-    show_stats: True  # display the stats box
+    show_stats: True
     options: ~
 
   # Create a profile plot:
@@ -63,7 +63,7 @@ hist_params:
     y_max:   # max y value
     x_title: "X label with [units]"
     y_title: "Y label with [units]"
-    show_stats: True  # display the stats box
+    show_stats: True
     options: ""
 
 # For methods defined in the UserFunctions class:
