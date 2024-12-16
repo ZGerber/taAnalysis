@@ -94,6 +94,7 @@ hist_params:
     max: 200
     x_title: "New Column"
     y_title: "Frequency"
+    show_stats: True
     options: ~
 ```
 
@@ -143,6 +144,7 @@ hist_params:
     max: 1400
     x_title: "X_{max} [g/cm^{2}]"
     y_title: "Events"
+    show_stats: True
     options: ~
 ```
 
@@ -197,7 +199,7 @@ cuts:
 
 ### Histogram Parameters
 
-The `hist_params` section in the YAML configuration file allows users to specify parameters for creating histograms. Each entry in this section defines a histogram to be created, including its name, title, style, column to be plotted, number of bins, range, axis titles, and additional options.
+The `hist_params` section in the YAML configuration file allows users to specify parameters for creating histograms. Each entry in this section defines a histogram to be created, including its name, title, style, column to be plotted, number of bins, range, axis titles, additional options, and whether to show the statistics box.
 
 #### Example
 
@@ -212,8 +214,23 @@ hist_params:
     max: 200
     x_title: "New Column 1"
     y_title: "Frequency"
+    show_stats: True
     options: ~
 ```
+
+#### Fields
+
+- **name**: The name of the histogram.
+- **title**: The title of the histogram.
+- **style**: The style of the plot (e.g., "histogram" or "profile_plot").
+- **column**: The column to be plotted.
+- **bins**: The number of bins in the histogram.
+- **min**: The minimum value of the histogram.
+- **max**: The maximum value of the histogram.
+- **x_title**: The title of the x-axis.
+- **y_title**: The title of the y-axis.
+- **show_stats**: A boolean value indicating whether to show the statistics box on the plot.
+- **options**: Additional options for the histogram.
 
 ## User-Defined Functions
 
