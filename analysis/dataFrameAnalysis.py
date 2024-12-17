@@ -261,8 +261,6 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
 
 
 def main():
-    logger = setup_logger()
-
     args = parse_arguments()
 
     # Initialize the DataFrameAnalyzer with the configuration file
@@ -279,4 +277,5 @@ def main():
 
 
 if __name__ == "__main__":
+    logger = setup_logger()
     main()

@@ -2,6 +2,7 @@ import colorlog
 import logging
 import argparse
 
+
 def setup_logger():
     """
     Set up the logger with color formatting.
@@ -38,6 +39,7 @@ def setup_logger():
     logger.addHandler(handler)
 
     return logger
+
 
 def parse_arguments():
     """
