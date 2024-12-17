@@ -10,6 +10,11 @@ from typing import List, Dict, Tuple, Any
 import argparse
 
 
+# @dst.ROOT.Numba.Declare(['float'], 'float')
+# def test_func(xmax):
+#     return xmax / 2
+
+
 def setup_logger():
     """
     Set up the logger with color formatting.
@@ -133,7 +138,7 @@ class DataFrameAnalyzer:
                 logger.error(f"Error while extracting column {column}: {str(e)}")
         return data
 
-    def apply_selection(self, selection: str) -> 'DataFrameAnalyzer':
+    def apply_selection(self, selection: str, cutnum: int) -> 'DataFrameAnalyzer':
         """
         Apply event selection to the RDataFrame using ROOT's filter.
 
@@ -141,7 +146,7 @@ class DataFrameAnalyzer:
         :return: Self for chaining.
         """
         logger.info(f"Applying selection: {selection}")
-        self.df = self.df.Filter(selection)
+        self.df = self.df.Filter(selection, f"Cut_{cutnum}")
         return self
 
     def define_new_column(self, column_info: Dict) -> 'DataFrameAnalyzer':
@@ -152,9 +157,7 @@ class DataFrameAnalyzer:
         :return: Self for chaining.
         """
         col = column_info
-        if not col['init']:
-            logger.info(f"Skipping column: {col.get('name', 'N/A')}. No initialization requested.")
-            return self
+
         name = col['name']
         if isinstance(col['expression'], str):
             expression = self._replace_profile_fit_index_in_expression(col['expression'])
@@ -180,8 +183,7 @@ class DataFrameAnalyzer:
             # Create histogram using parameters from the YAML file
             histogram = self.df.Histo1D(
                 (hist['name'], hist['title'], hist['bins'], hist['min'], hist['max']),
-                hist['column']
-            )
+                hist['column'])
             histogram.SetXTitle(hist['x_title'])
             histogram.SetYTitle(hist['y_title'])
             if not hist['show_stats']:
@@ -250,7 +252,7 @@ class DataFrameAnalyzer:
         :return: List of histograms generated from the analysis.
         """
         # Extract configuration details
-        selections = self.config.get('cuts', [])
+        selections  = self.config.get('cuts', [])
         new_columns = self.config.get('new_columns', [])
         hist_params = self.config.get('hist_params', [])
 
@@ -261,36 +263,35 @@ class DataFrameAnalyzer:
         # Prepare the user function arguments
         user_functions = self.config.get('user_functions', [])
         for user_function in user_functions:
-            func_name = user_function['name']
-            func_call = user_function['callable']
-            func_args = user_function.get('args', [])
+            func_name  = user_function['name']
+            new_column = user_function['new_column']
+            func_call  = user_function['callable']
+            func_args  = user_function.get('args', [])
+            func_arg_list = [arg['value'] for arg in func_args]
 
             # Prepare the data (columns) for user functions
-            logger.info(f"Preparing data for user function: {func_name}")
-            if func_args:
-                column_data = self.prepare_data([arg['value'] for arg in func_args])
-            else:
-                column_data = {}
+            # logger.info(f"Preparing data for user function: {func_name}")
+            # if func_args:
+            #     column_data = self.prepare_data([arg['value'] for arg in func_args])
+            # else:
+            #     column_data = {}
 
             user_func_instance = UserFunctions(logger)
 
             # Dynamically call the function from UserFunctions class
             if hasattr(user_func_instance, func_call):
                 func = getattr(user_func_instance, func_call)
-                logger.info(f"Running user function: {func_name} with arguments: {[arg['value'] for arg in func_args]}")
+                logger.info(f"Running user function {func_name} with arguments: {func_arg_list}")
 
-                # logger.debug(f"{[arg for arg in column_data if arg in column_data]}")
-                # Pass the arguments as numpy arrays
-                results = func(*[column_data[arg['value']] for arg in func_args if arg['value'] in column_data])
+                new_column_info = {'name': new_column,
+                                   'expression': f"Numba::{func_call}({', '.join(func_arg_list)})"}
 
-                logger.debug(f"{func_name} results: {results}")
-
-                # for result in results:
-                #     self.define_new_column(result)
+                self.define_new_column(new_column_info)
+                logger.debug(f"Defined new column: {new_column} with data: {self.df.AsNumpy([new_column])[new_column]}")
 
         # Apply selections
-        for selection in selections:
-            self.apply_selection(selection)
+        for i, selection in enumerate(selections):
+            self.apply_selection(selection, i)
 
         # Create histograms
         histogram_list = []
@@ -298,6 +299,10 @@ class DataFrameAnalyzer:
             histogram_list.append(self.create_histogram(hist))
 
         logger.info("ANALYSIS COMPLETE!")
+
+        allCutsReport = self.df.Report()
+        allCutsReport.Print()
+
         return histogram_list
 
 
@@ -326,7 +331,8 @@ if __name__ == "__main__":
     my_histograms = analyzer.run_analysis()
 
     # Save the histograms to ROOT files
-    analyzer.save_histograms(my_histograms)
+    # analyzer.save_histograms(my_histograms)
 
     # Plot the histograms on a ROOT canvas
-    plot_histograms(my_histograms)
+    # plot_histograms(my_histograms)
+
