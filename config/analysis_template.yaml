@@ -14,11 +14,9 @@ fit_ids:
 new_columns:
   - name: "EXAMPLE_COLUMN"
     expression: "example.dst.variable[{example_index}]"
-    init: True
 
   - name: "ANOTHER_EXAMPLE_COLUMN"
     expression: "another_example.dst.variable[{another_index}][0]"
-    init: False # Don't create the column at runtime. It will be calculated on the fly.
 
 # Event Selection Criteria
 cuts:
