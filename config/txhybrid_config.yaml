@@ -18,59 +18,48 @@ detectors:
 new_columns:
   - name: "Xmax"  # Name of the new column.
     expression: "prfc.xm[{profile_fit_index}]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "Xlow"  # Name of the new column.
     expression: "prfc.dep[{profile_fit_index}][0]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "Xhigh"  # Name of the new column.
     expression: "prfc.dep[{profile_fit_index}][prfc.nbin[{profile_fit_index}]-1]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "LogEnergy"  # Name of the new column.
     expression: "18. + TMath::Log10(prfc.eng[{profile_fit_index}])"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "Zenith"  # Name of the new column.
     expression: "TMath::RadToDeg()*hctim.mthe[{profile_fit_index}]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "Psi"  # Name of the new column.
     expression: "TMath::RadToDeg()*hctim.mpsi[{profile_fit_index}]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "PulseArea"  # Name of the new column.
     expression: "tlfptn.pulsa"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "TriggeredSDCount"  # Name of the new column.
     expression: "tlfptn.nhits"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "GeometryFitStatus"  # Name of the new column.
     expression: "hctim.failmode[{profile_fit_index}]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "ProfileFitStatus"  # Name of the new column.
     expression: "prfc.failmode[{profile_fit_index}]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "GeometryFitQuality"  # Name of the new column.
     expression: "hctim.mchi2[{profile_fit_index}] / (prfc.nbin[{profile_fit_index}] - 2)"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "ProfileFitQuality"  # Name of the new column.
     expression: "prfc.chi2[{profile_fit_index}] / prfc.ndf[{profile_fit_index}]"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "HitSDsXXYY"  # Name of the new column.
     expression: "tlfptn.xxyy"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
 
   - name: "HitSDsCLF"  # Name of the new column.
     expression: "tlfptn.xyzclf"  # Expression to calculate the values of the new column.
-    init: True  # Initialize the column during the analysis process.
+
+  - name: "Talex00HitSDsXXYY"  # Name of the new column.
+    expression: "talex00.xxyy"  # Expression to calculate the values of the new column.
 
 # Event Selection Criteria
 cuts:
@@ -182,12 +171,16 @@ hist_params:
     options: ""  # Additional options for the profile plot.
 
 user_functions:
-  - name: "Get Core XXYY"  # Name of the user function.
-    callable: "get_core_xxyy"  # Callable function name.
+#  - name: "Get Core XXYY"  # Name of the user function.
+#    new_col: "HotSD"  # Name of the new column to be created.
+#    callable: "get_core_xxyy"  # Callable function name.
+#    args:
+#      - name: "column1"  # Name of the first argument.
+#        value: "PulseArea"  # Value of the first argument.
+  - name: "Test Func"
+    new_column: "Test_col"
+    callable: "test_func"
     args:
-      - name: "column1"  # Name of the first argument.
-        value: "HitSDsCLF"  # Value of the first argument.
-      - name: "column2"  # Name of the second argument.
-        value: "PulseArea"  # Value of the second argument.
+      - value: "Xmax"
 #  - name: "Say Hello"
 #    callable: "say_hello"
