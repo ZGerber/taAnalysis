@@ -6,7 +6,7 @@ import os
 import yaml
 import numpy as np
 from typing import List, Dict, Tuple, Any
-from config.utils import setup_logger, parse_arguments
+from config.utils import logger, parse_arguments
 
 
 class DataFrameAnalyzer:
@@ -261,8 +261,6 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
 
 
 def main():
-    logger = setup_logger()
-
     args = parse_arguments()
 
     # Initialize the DataFrameAnalyzer with the configuration file

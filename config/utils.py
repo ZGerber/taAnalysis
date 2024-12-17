@@ -39,6 +39,8 @@ def setup_logger():
 
     return logger
 
+logger = setup_logger()
+
 def parse_arguments():
     """
     Parse command-line arguments for the script.
