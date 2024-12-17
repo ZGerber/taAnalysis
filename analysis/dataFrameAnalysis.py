@@ -1,77 +1,28 @@
 from example_analysis import UserFunctions
 
-import colorlog
 import dstpy as dst
 import logging
 import os
 import yaml
 import numpy as np
 from typing import List, Dict, Tuple, Any
-import argparse
-
-
-def setup_logger():
-    """
-    Set up the logger with color formatting.
-
-    :return: Configured logger instance.
-    """
-    # Create a logger
-    logger = logging.getLogger(__name__)
-
-    # Set the logging level (e.g., DEBUG, INFO)
-    logger.setLevel(logging.DEBUG)
-
-    # Create a handler for printing log messages to the console
-    handler = logging.StreamHandler()
-
-    # Create a formatter with colors
-    formatter = colorlog.ColoredFormatter(
-        '%(log_color)s%(levelname)-8s%(reset)s %(white)s%(message)s',
-        datefmt=None,
-        reset=True,
-        log_colors={
-            'DEBUG': 'cyan',
-            'INFO': 'green',
-            'WARNING': 'yellow',
-            'ERROR': 'red',
-            'CRITICAL': 'bold_red',
-        }
-    )
-
-    # Set the formatter for the handler
-    handler.setFormatter(formatter)
-
-    # Add the handler to the logger
-    logger.addHandler(handler)
-
-    return logger
-
-
-def parse_arguments():
-    """
-    Parse command-line arguments for the script.
-
-    :return: Parsed arguments.
-    """
-    parser = argparse.ArgumentParser(description="Run the DataFrame analysis with a specified YAML configuration file.")
-    parser.add_argument("config_file", type=str, help="Path to the YAML configuration file.")
-    parser.add_argument("-r", "--report", action="store_true", help="Print the efficiency report after applying cuts.")
-    return parser.parse_args()
+from config.utils import setup_logger, parse_arguments
 
 
 class DataFrameAnalyzer:
-    def __init__(self, config_file: str):
+    def __init__(self, config_file: str, args: Any):
         """
         Initializes the DataFrameAnalyzer with configurations from a YAML file.
 
         :param config_file: Path to the YAML configuration file.
+        :param args: Parsed command-line arguments.
         """
         self.config = self._load_config(config_file)
         self.input_file = self.config.get('input_file', os.environ.get('ALL_HYBRID'))  # Default to environment variable
         self.tree_name = self.config.get('tree_name', 'taTree')
         self.detector = self.config.get('detector', 'None')
         self.df = self._load_dataframe()
+        self.args = args
         logger.info(f"DataFrame for tree {self.tree_name} loaded successfully.")
 
     @staticmethod
@@ -265,13 +216,6 @@ class DataFrameAnalyzer:
             func_args  = user_function.get('args', [])
             func_arg_list = [arg['value'] for arg in func_args]
 
-            # Prepare the data (columns) for user functions
-            # logger.info(f"Preparing data for user function: {func_name}")
-            # if func_args:
-            #     column_data = self.prepare_data([arg['value'] for arg in func_args])
-            # else:
-            #     column_data = {}
-
             user_func_instance = UserFunctions(logger)
 
             # Dynamically call the function from UserFunctions class
@@ -297,7 +241,7 @@ class DataFrameAnalyzer:
         logger.info("ANALYSIS COMPLETE!")
 
         # Print the efficiency report after applying cuts
-        if args.report:
+        if self.args.report:
             logger.info("Printing efficiency report...")
             self.df.Report().Print()
         return histogram_list
@@ -316,13 +260,13 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
         input("Press Enter to continue...")
 
 
-if __name__ == "__main__":
+def main():
     logger = setup_logger()
 
     args = parse_arguments()
 
     # Initialize the DataFrameAnalyzer with the configuration file
-    analyzer = DataFrameAnalyzer(args.config_file)
+    analyzer = DataFrameAnalyzer(args.config_file, args)
 
     # Run the analysis and get the list of histograms
     my_histograms = analyzer.run_analysis()
@@ -333,3 +277,6 @@ if __name__ == "__main__":
     # Plot the histograms on a ROOT canvas
     # plot_histograms(my_histograms)
 
+
+if __name__ == "__main__":
+    main()
