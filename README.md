@@ -111,6 +111,7 @@ The script supports the following command-line options:
 
 - `config_file`: Path to the YAML configuration file.
 - `-h` or `--help`: Display the help message.
+- `-r` or `--report`: Print the efficiency report after applying cuts.
 
 To display the help message, run:
 
@@ -283,7 +284,6 @@ user_functions:
 The `DataFrameAnalyzer` will automatically call the user-defined function during the analysis process, and the new columns will be added to the dataframe.
 
 By following these steps, users can extend the functionality of the analysis by adding custom calculations tailored to their specific needs.
-
 
 ## Authors
 
