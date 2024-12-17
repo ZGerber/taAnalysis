@@ -5,6 +5,7 @@ from typing import Optional, List, Union, Any, Dict
 import logging
 import awkward as ak
 import dstpy as dst
+from config.utils import setup_logger
 
 
 class UserFunctions:
@@ -12,8 +13,8 @@ class UserFunctions:
     User-defined functions to be used in the analysis.
     """
 
-    def __init__(self, logger: logging.Logger):
-        self.logger = logger
+    def __init__(self):
+        self.logger = setup_logger()
 
     def say_hello(self):
         """
