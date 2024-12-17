@@ -79,7 +79,6 @@ detectors:
 new_columns:
   - name: "NewColumn"
     expression: "some_expression"
-    init: True
 
 cuts:
   - "NewColumn > 100"
@@ -140,7 +139,6 @@ detectors:
 new_columns:
   - name: "Xmax"
     expression: "prfc.xm[{profile_fit_index}]"
-    init: True
 
 cuts:
   - "Xmax > Xlow"
@@ -176,7 +174,7 @@ The configuration file allows users to specify various parameters for the analys
 
 ### New Columns
 
-The `new_columns` section in the YAML configuration file allows users to define new columns in the dataframe. Each entry in this section specifies a new column to be created, including its name, the expression used to calculate its values, and whether it should be initialized.
+The `new_columns` section in the YAML configuration file allows users to define new columns in the dataframe. Each entry in this section specifies a new column to be created, including its name and the expression used to calculate its values.
 
 #### Example
 
@@ -184,17 +182,14 @@ The `new_columns` section in the YAML configuration file allows users to define 
 new_columns:
   - name: "NewColumn1"
     expression: "column1 + column2"
-    init: True
   - name: "NewColumn2"
     expression: "column3 * 2"
-    init: False
 ```
 
 #### Fields
 
 - **name**: The name of the new column to be created.
 - **expression**: The expression used to calculate the values of the new column. This can be a mathematical operation or a function applied to existing columns.
-- **init**: A boolean value indicating whether the column should be initialized. If `True`, the column will be created during the analysis process. Otherwise it will be created via user-defined functions.
 
 By defining new columns in this section, users can extend the dataframe with additional calculated data, which can then be used in further analysis or visualizations.
 
