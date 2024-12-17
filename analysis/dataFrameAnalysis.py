@@ -10,11 +10,6 @@ from typing import List, Dict, Tuple, Any
 import argparse
 
 
-# @dst.ROOT.Numba.Declare(['float'], 'float')
-# def test_func(xmax):
-#     return xmax / 2
-
-
 def setup_logger():
     """
     Set up the logger with color formatting.
@@ -61,6 +56,7 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(description="Run the DataFrame analysis with a specified YAML configuration file.")
     parser.add_argument("config_file", type=str, help="Path to the YAML configuration file.")
+    parser.add_argument("-r", "--report", action="store_true", help="Print the efficiency report after applying cuts.")
     return parser.parse_args()
 
 
@@ -289,8 +285,8 @@ class DataFrameAnalyzer:
                 self.define_new_column(new_column_info)
                 logger.debug(f"Defined new column: {new_column} with data: {self.df.AsNumpy([new_column])[new_column]}")
 
-        # Apply selections
-        for i, selection in enumerate(selections):
+        # Apply selections. Number them in case the user wants to generate a report.
+        for i, selection in enumerate(selections, start=1):
             self.apply_selection(selection, i)
 
         # Create histograms
@@ -300,9 +296,10 @@ class DataFrameAnalyzer:
 
         logger.info("ANALYSIS COMPLETE!")
 
-        allCutsReport = self.df.Report()
-        allCutsReport.Print()
-
+        # Print the efficiency report after applying cuts
+        if args.report:
+            logger.info("Printing efficiency report...")
+            self.df.Report().Print()
         return histogram_list
 
 
