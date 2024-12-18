@@ -6,7 +6,7 @@ import os
 import yaml
 import numpy as np
 from typing import List, Dict, Tuple, Any
-from config.utils import logger, parse_arguments
+from utils import logger, parse_arguments
 
 
 class DataFrameAnalyzer:
@@ -216,7 +216,7 @@ class DataFrameAnalyzer:
             func_args  = user_function.get('args', [])
             func_arg_list = [arg['value'] for arg in func_args]
 
-            user_func_instance = UserFunctions(logger)
+            user_func_instance = UserFunctions()
 
             # Dynamically call the function from UserFunctions class
             if hasattr(user_func_instance, func_call):

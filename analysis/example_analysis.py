@@ -5,7 +5,7 @@ from typing import Optional, List, Union, Any, Dict
 import logging
 import awkward as ak
 import dstpy as dst
-from config.utils import logger
+from utils import logger
 
 
 class UserFunctions:
@@ -53,3 +53,7 @@ class UserFunctions:
         except Exception as e:
             logger.error(f"Error in Get Core XXYY: {str(e)}")
             return []
+
+
+if __name__ == "__main__":
+    raise ImportError("This module should not be run directly. Import it as a module.")
