@@ -35,8 +35,8 @@ This project aims to simplify the process of analyzing data from the Telescope A
 To install the project, clone the repository and install the required dependencies:
 
 ```bash
-git clone https://github.com/yourusername/yourproject.git
-cd yourproject
+git clone https://github.com/ZGerber/taAnalysis.git
+cd taAnalysis
 ```
 
 See [Requirements](#requirements) for dependencies.
