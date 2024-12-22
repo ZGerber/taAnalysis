@@ -2,6 +2,7 @@ import colorlog
 import logging
 import argparse
 
+
 def setup_logger():
     """
     Set up the logger with color formatting.
@@ -39,7 +40,9 @@ def setup_logger():
 
     return logger
 
+
 logger = setup_logger()
+
 
 def parse_arguments():
     """
@@ -50,4 +53,33 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description="Run the DataFrame analysis with a specified YAML configuration file.")
     parser.add_argument("config_file", type=str, help="Path to the YAML configuration file.")
     parser.add_argument("-r", "--report", action="store_true", help="Print the efficiency report after applying cuts.")
+    parser.add_argument("-p", "--parallel", action="store_true", help="Use parallel processing with Dask.")
     return parser.parse_args()
+
+
+def setup_dask_client(n_workers: int = 4, threads_per_worker: int = 1, memory_limit: str = '2GB',
+                      local_directory: str = '/tmp'):
+    """
+    Set up a Dask client and cluster for parallel processing.
+
+    :param n_workers: Number of Dask workers.
+    :param threads_per_worker: Number of threads per Dask worker.
+    :param memory_limit: Memory limit per worker.
+    :param local_directory: Directory for local Dask worker files.
+    :return: Dask Client object.
+    """
+    logger.info("Using parallel processing with Dask")
+    from dask.distributed import Client, LocalCluster
+
+    # Set up the Dask LocalCluster
+    cluster = LocalCluster(
+        n_workers=n_workers,
+        threads_per_worker=threads_per_worker,
+        memory_limit=memory_limit,
+        local_directory=local_directory
+    )
+    client = Client(cluster)
+    logger.info(f"Dask client configured: {client}")
+
+    return client
+
