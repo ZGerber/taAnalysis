@@ -1,23 +1,11 @@
-# user_functions.py
-
-from typing import Optional, List, Union, Any, Dict
-from utils import logger
+# txHybrid_composition.py
 
 
-class UserFunctions:
+class TAx4HybridCompositionFunctions:
     """
-    User-defined functions to be used in the analysis.
+    A class that contains various utility functions for generating C++ code
+    related to ROOT RVec operations.
     """
-
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def say_hello(self):
-        """
-        Function to print hello.
-        """
-        logger.info("Hello!")
 
     @staticmethod
     def findMaxInRVec(input_vector: str) -> str:
@@ -69,7 +57,7 @@ class UserFunctions:
         :param innerVec: Name of the input vector of vectors.
         :return: C++ code as a string.
         """
-        return (f"""
+        return f"""
                 std::vector<double> meanVectorVector(const ROOT::RVec<std::vector<double>> &{innerVec}) {{
                     std::vector<double> mean;
 
@@ -90,8 +78,4 @@ class UserFunctions:
 
                     return mean;
                 }}
-                """)
-
-
-if __name__ == "__main__":
-    raise ImportError("This module should not be run directly. Import it as a module.")
+                """

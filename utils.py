@@ -1,6 +1,7 @@
 import colorlog
 import logging
 import argparse
+import sys
 
 
 def setup_logger():
@@ -83,3 +84,24 @@ def setup_dask_client(n_workers: int = 4, threads_per_worker: int = 1, memory_li
 
     return client
 
+
+class ConfigError(Exception):
+    """Exception raised when a required configuration is missing."""
+
+    def __init__(self, missing_parameter):
+        self.missing_parameter = missing_parameter
+        self._log_error()
+
+    def _log_error(self):
+        """
+        Log the error when a missing configuration parameter is encountered.
+        """
+        logger.error(f"Configuration error: '{self.missing_parameter}' cannot be None.")
+        sys.exit(1)
+
+    def __str__(self):
+        """
+        String representation of the error. When the exception is printed,
+        this will be shown.
+        """
+        return f"Configuration error: '{self.missing_parameter}' cannot be None."
