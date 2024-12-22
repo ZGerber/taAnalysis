@@ -1,28 +1,28 @@
 from example_analysis import UserFunctions
-
 import dstpy as dst
-import logging
 import os
 import yaml
 import numpy as np
-from typing import List, Dict, Tuple, Any
+from typing import List, Dict, Any
 from utils import logger, parse_arguments
 
 
 class DataFrameAnalyzer:
-    def __init__(self, config_file: str, args: Any):
+    def __init__(self, config_file: str, args: Any, client: Any = None):
         """
         Initializes the DataFrameAnalyzer with configurations from a YAML file.
 
         :param config_file: Path to the YAML configuration file.
         :param args: Parsed command-line arguments.
+        :param client: Dask client for parallel processing (optional).
         """
+        self.args = args
+        self.client = client
         self.config = self._load_config(config_file)
         self.input_file = self.config.get('input_file', os.environ.get('ALL_HYBRID'))  # Default to environment variable
         self.tree_name = self.config.get('tree_name', 'taTree')
         self.detector = self.config.get('detector', 'None')
         self.df = self._load_dataframe()
-        self.args = args
         logger.info(f"DataFrame for tree {self.tree_name} loaded successfully.")
 
     @staticmethod
@@ -42,16 +42,16 @@ class DataFrameAnalyzer:
         Get the index of the profile fit parameter.
 
         :return: Index of the profile fit parameter.
+        :raises: Exception if the profile index cannot be determined.
         """
         try:
-            det = self.detector
             detectors = self.config.get('detectors', {})
             for d in detectors:
                 if d['name'] == self.detector:
                     return d.get('profile', 0)
         except Exception as e:
             logger.error(f"Error while getting profile fit index: {str(e)}")
-            return 0
+        return 0
 
     def _replace_profile_fit_index_in_expression(self, expression: str) -> str:
         """
@@ -68,7 +68,12 @@ class DataFrameAnalyzer:
 
         :return: RDataFrame containing the data from the ROOT TTree.
         """
-        return dst.ROOT.RDataFrame(self.tree_name, self.input_file)
+        if self.args.parallel:
+            # dataFrame = dst.ROOT.RDF.Experimental.Distributed.Dask.RDataFrame
+            # return dataFrame(self.tree_name, self.input_file, daskclient=self.client)
+            return dst.ROOT.RDataFrame(self.tree_name, self.input_file)
+        else:
+            return dst.ROOT.RDataFrame(self.tree_name, self.input_file)
 
     def prepare_data(self, columns: List[str]) -> Dict[str, np.ndarray]:
         """
@@ -77,19 +82,27 @@ class DataFrameAnalyzer:
         :param columns: List of column names to extract from the dataframe.
         :return: Dictionary of column names mapped to numpy arrays.
         """
-        data = {}
-        for column in columns:
-            try:
-                data[column] = self.df.AsNumpy([column])[column]
-            except Exception as e:
-                logger.error(f"Error while extracting column {column}: {str(e)}")
-        return data
+        return {column: self._extract_column(column) for column in columns}
+
+    def _extract_column(self, column: str) -> np.ndarray:
+        """
+        Extract column data from the DataFrame and handle errors.
+
+        :param column: The column name to extract.
+        :return: Numpy array of the column data, or an empty array if an error occurs.
+        """
+        try:
+            return self.df.AsNumpy([column])[column]
+        except Exception as e:
+            logger.error(f"Error while extracting column {column}: {str(e)}")
+            return np.array([])
 
     def apply_selection(self, selection: str, cutnum: int) -> 'DataFrameAnalyzer':
         """
         Apply event selection to the RDataFrame using ROOT's filter.
 
         :param selection: The filtering condition as a string.
+        :param cutnum: Cut number used to label the selection.
         :return: Self for chaining.
         """
         logger.info(f"Applying selection: {selection}")
@@ -103,17 +116,10 @@ class DataFrameAnalyzer:
         :param column_info: Dictionary containing column name and expression.
         :return: Self for chaining.
         """
-        col = column_info
-
-        name = col['name']
-        if isinstance(col['expression'], str):
-            expression = self._replace_profile_fit_index_in_expression(col['expression'])
-            self.df = self.df.Define(name, expression)
-        else:
-            expression = col['expression']
-            self.df = self.df.Define(name, expression)
-
-        logger.info(f"Defining new column: {name} with expression: {expression}")
+        expression = self._replace_profile_fit_index_in_expression(column_info['expression']) if isinstance(
+            column_info['expression'], str) else column_info['expression']
+        self.df = self.df.Define(column_info['name'], expression)
+        logger.info(f"Defining new column: {column_info['name']} with expression: {expression}")
         return self
 
     def create_histogram(self, histogram_info: Dict) -> dst.ROOT.TH1F:
@@ -123,48 +129,76 @@ class DataFrameAnalyzer:
         :param histogram_info: Dictionary containing histogram parameters.
         :return: Created histogram.
         """
-        hist = histogram_info
+        if histogram_info['style'] == 'histogram':
+            return self._create_histogram(histogram_info)
+        elif histogram_info['style'] == 'profile_plot':
+            return self._create_profile_plot(histogram_info)
+        return None
 
-        if hist['style'] == 'histogram':
-            logger.info(f"Creating histogram for column: {hist.get('column', 'N/A')}")
-            # Create histogram using parameters from the YAML file
-            histogram = self.df.Histo1D(
-                (hist['name'], hist['title'], hist['bins'], hist['min'], hist['max']),
-                hist['column'])
-            histogram.SetXTitle(hist['x_title'])
-            histogram.SetYTitle(hist['y_title'])
-            if not hist['show_stats']:
-                histogram.SetStats(0)
-            return histogram.GetPtr()
+    def _create_histogram(self, hist: Dict) -> dst.ROOT.TH1F:
+        """
+        Create a simple histogram.
 
-        elif hist['style'] == 'profile_plot':
-            logger.info(f"Creating profile plot for columns: {hist.get('y_column')} and {hist.get('x_column')}")
+        :param hist: Dictionary containing histogram parameters.
+        :return: Created histogram.
+        """
+        logger.info(f"Creating histogram for column: {hist.get('column', 'N/A')}")
+        histogram = self.df.Histo1D(
+            (hist['name'], hist['title'], hist['bins'], hist['min'], hist['max']),
+            hist['column']
+        )
+        self._set_histogram_parameters(hist, histogram)
+        return histogram.GetPtr()
 
-            # Plot can be defined by number of bins over some domain, or by custom bin edges:
-            x_bin_edges = hist.get('x_bin_edges', [])
-            if x_bin_edges:
-                # Convert the bin edges to ROOT std::vector<double>
-                x_bins = dst.ROOT.std.vector('double')()
-                for edge in x_bin_edges:
-                    x_bins.push_back(float(edge))
+    def _create_profile_plot(self, hist: Dict) -> dst.ROOT.TH1F:
+        """
+        Create a profile plot.
 
-                # Create profile plot with bin edges
-                histogram = self.df.Profile1D(
-                    (hist['name'], hist['title'], len(x_bins) - 1, x_bins.data(), hist['options']),
-                    hist['x_column'], hist['y_column']
-                )
-            else:
-                # Create profile plot with 'x_bins', 'x_min', 'x_max' if no bin edges are provided
-                histogram = self.df.Profile1D(
-                    (hist['name'], hist['title'], hist['x_bins'], hist['x_min'], hist['x_max'], hist['options']),
-                    hist['x_column'], hist['y_column']
-                )
+        :param hist: Dictionary containing profile plot parameters.
+        :return: Created profile plot.
+        """
+        logger.info(f"Creating profile plot for columns: {hist.get('y_column')} and {hist.get('x_column')}")
 
-            histogram.SetXTitle(hist['x_title'])
-            histogram.SetYTitle(hist['y_title'])
-            if not hist['show_stats']:
-                histogram.SetStats(0)
-            return histogram.GetPtr()
+        x_bin_edges = hist.get('x_bin_edges', [])
+
+        if x_bin_edges:
+            x_bin_edges_vec = self._convert_to_std_vector(x_bin_edges)
+            histo = self.df.Profile1D(
+                (hist['name'], hist['title'], len(x_bin_edges) - 1, x_bin_edges_vec.data(),
+                 hist['options']), hist['x_column'], hist['y_column'])
+        else:
+            histo = self.df.Profile1D(
+                (hist['name'], hist['title'], hist['x_bins'], hist['x_min'], hist['x_max'], hist['options']),
+                hist['x_column'], hist['y_column'])
+        self._set_histogram_parameters(hist, histo)
+        return histo.GetPtr()
+
+    @staticmethod
+    def _convert_to_std_vector(x_bin_edges: List[float]) -> dst.ROOT.std.vector('double'):
+        """
+        Convert x_bin_edges to a ROOT std::vector<double>.
+
+        :param x_bin_edges: List of x bin edges.
+        :return: ROOT std::vector of type double containing the bin edges.
+        """
+        x_bin_edges.sort()
+        x_bins = dst.ROOT.std.vector('double')()
+        for edge in x_bin_edges:
+            x_bins.push_back(float(edge))
+        return x_bins
+
+    @staticmethod
+    def _set_histogram_parameters(hist: Dict, histogram: dst.ROOT.TH1F) -> None:
+        """
+        Set the parameters for drawing histograms.
+
+        :param hist: Dictionary containing axis title information.
+        :param histogram: Histogram to set titles on.
+        """
+        histogram.SetXTitle(hist['x_title'])
+        histogram.SetYTitle(hist['y_title'])
+        if not hist['show_stats']:
+            histogram.SetStats(0)
 
     @staticmethod
     def save_histogram(histogram: dst.ROOT.TH1F, output_file: str) -> None:
@@ -174,8 +208,8 @@ class DataFrameAnalyzer:
         :param histogram: The histogram to be saved.
         :param output_file: The name of the output ROOT file.
         """
-        with dst.ROOT.TFile(output_file, "RECREATE") as root_file:
-            histogram.Write()  # Write the histogram to the ROOT file
+        with dst.ROOT.TFile(output_file, "RECREATE"):
+            histogram.Write()
         logger.info(f"Saved histogram to {output_file}")
 
     def save_histograms(self, histograms: List[dst.ROOT.TH1F]) -> None:
@@ -188,9 +222,46 @@ class DataFrameAnalyzer:
         logger.info(f"Saving histograms...")
         os.makedirs(output_dir, exist_ok=True)
         for hist in histograms:
-            # Create a unique file name for each histogram based on its name
             output_file = f"{output_dir}/{hist.GetName()}.root"
             self.save_histogram(hist, output_file)
+
+    def _apply_user_function(self, user_function: Dict) -> None:
+        """
+        Apply a user-defined function to the DataFrame to create a new column.
+
+        :param user_function: Dictionary containing user function information.
+        """
+        language = user_function['language']
+        new_column = user_function['new_column']
+        func_call = user_function['callable']
+        func_args = user_function.get('args', [])
+        func_arg_list = [arg['value'] for arg in func_args]
+        func_arg_csv = ', '.join(func_arg_list)
+
+        user_func_instance = UserFunctions()
+
+        if not func_call and language in ['ROOT', 'RDF', 'direct', 'None', None]:
+            new_column_info = {'name': new_column, 'expression': f"{func_arg_list[0]}[{func_arg_list[1]}]"}
+        elif hasattr(user_func_instance, func_call):
+            func = getattr(user_func_instance, func_call)
+            logger.info(f"Running user function {func_call} with arguments: {func_arg_list}")
+
+            if language in ['C++', 'cpp', 'c++', 'cxx']:
+                dst.ROOT.gInterpreter.Declare(func(*func_arg_list))
+                new_column_info = {'name': new_column, 'expression': f"{func_call}({func_arg_csv})"}
+
+            elif language in ['python', 'Python', 'py']:
+                new_column_info = {'name': new_column, 'expression': f"Numba::{func_call}({func_arg_csv})"}
+
+            else:
+                logger.warning(f"Unsupported language: {language}. Column {new_column} not filled.")
+                new_column_info = None
+        else:
+            logger.warning(f"User function {func_call} not found. Column {new_column} not filled.")
+            new_column_info = None
+
+        if new_column_info:
+            self.define_new_column(new_column_info)
 
     def run_analysis(self) -> List[Any]:
         """
@@ -198,53 +269,31 @@ class DataFrameAnalyzer:
 
         :return: List of histograms generated from the analysis.
         """
-        # Extract configuration details
-        selections  = self.config.get('cuts', [])
-        new_columns = self.config.get('new_columns', [])
-        hist_params = self.config.get('hist_params', [])
+        histograms = []
 
         # Define new columns
-        for col in new_columns:
+        for col in self.config.get('new_columns', []):
             self.define_new_column(col)
 
-        # Prepare the user function arguments
-        user_functions = self.config.get('user_functions', [])
-        for user_function in user_functions:
-            func_name  = user_function['name']
-            new_column = user_function['new_column']
-            func_call  = user_function['callable']
-            func_args  = user_function.get('args', [])
-            func_arg_list = [arg['value'] for arg in func_args]
+        # Apply user functions
+        for user_function in self.config.get('user_functions', []):
+            self._apply_user_function(user_function)
 
-            user_func_instance = UserFunctions()
-
-            # Dynamically call the function from UserFunctions class
-            if hasattr(user_func_instance, func_call):
-                func = getattr(user_func_instance, func_call)
-                logger.info(f"Running user function {func_name} with arguments: {func_arg_list}")
-
-                new_column_info = {'name': new_column,
-                                   'expression': f"Numba::{func_call}({', '.join(func_arg_list)})"}
-
-                self.define_new_column(new_column_info)
-                logger.debug(f"Defined new column: {new_column} with data: {self.df.AsNumpy([new_column])[new_column]}")
-
-        # Apply selections. Number them in case the user wants to generate a report.
-        for i, selection in enumerate(selections, start=1):
+        # Apply cuts
+        for i, selection in enumerate(self.config.get('cuts', []), start=1):
             self.apply_selection(selection, i)
 
         # Create histograms
-        histogram_list = []
-        for hist in hist_params:
-            histogram_list.append(self.create_histogram(hist))
+        for hist in self.config.get('hist_params', []):
+            histograms.append(self.create_histogram(hist))
 
         logger.info("ANALYSIS COMPLETE!")
 
-        # Print the efficiency report after applying cuts
         if self.args.report:
             logger.info("Printing efficiency report...")
             self.df.Report().Print()
-        return histogram_list
+
+        return histograms
 
 
 def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
@@ -261,19 +310,29 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
 
 
 def main():
+    """
+    Main function to run the analysis.
+
+    :return: None
+    """
     args = parse_arguments()
 
-    # Initialize the DataFrameAnalyzer with the configuration file
-    analyzer = DataFrameAnalyzer(args.config_file, args)
+    client = None
+    if args.parallel:
+        logger.warning("Parallel processing with Dask is not supported in this version. Running in serial mode.")
+        # from utils import setup_dask_client
+        # client = setup_dask_client()
+
+    analyzer = DataFrameAnalyzer(args.config_file, args, client)
 
     # Run the analysis and get the list of histograms
     my_histograms = analyzer.run_analysis()
 
-    # Save the histograms to ROOT files
-    # analyzer.save_histograms(my_histograms)
+    # Save histograms, if needed
+    analyzer.save_histograms(my_histograms)
 
     # Plot the histograms on a ROOT canvas
-    # plot_histograms(my_histograms)
+    plot_histograms(my_histograms)
 
 
 if __name__ == "__main__":

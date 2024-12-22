@@ -177,10 +177,38 @@ user_functions:
 #    args:
 #      - name: "column1"  # Name of the first argument.
 #        value: "PulseArea"  # Value of the first argument.
-  - name: "Test Func"
-    new_column: "Test_col"
-    callable: "test_func"
+
+  - new_column: "PulseAreaMean"
+    callable: "meanVectorVector"
+    language: "C++"
     args:
-      - value: "Xmax"
+      - value: "PulseArea"
+
+  - new_column: "HotSDSignal"
+    callable: "findMaxInRVec"
+    language: "C++"
+    args:
+      - value: "PulseAreaMean"
+
+  - new_column: "HotSDIndex"
+    callable: "findHotSDIndex"
+    language: "C++"
+    args:
+      - value: "PulseAreaMean"
+
+  - new_column: "HotSDCLF"
+    callable: ~
+    language: ~
+    args:
+      - value: "HitSDsCLF"
+      - value: "HotSDIndex"
+
+  - new_column: "HotSDxxyy"
+    callable: ~
+    language: ~
+    args:
+      - value: "HitSDsXXYY"
+      - value: "HotSDIndex"
+
 #  - name: "Say Hello"
 #    callable: "say_hello"

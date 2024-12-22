@@ -16,43 +16,85 @@ class UserFunctions:
     def __init__(self):
         pass
 
+    @staticmethod
     def say_hello(self):
         """
         Function to print hello.
         """
         logger.info("Hello!")
 
-    # @dst.ROOT.Numba.Declare(['float', 'float'], 'float')
-    def get_core_xxyy(self, hit_sds: np.ndarray, pulse_area: np.ndarray) -> List[
-            Union[Dict[str, Union[str, Any]], Dict[str, Union[str, Any]]]]:
-        try:
-            logger.info("Calculating mean SD signals...")
+    @staticmethod
+    def findMaxInRVec(input_vector):
+        """
+        Generate C++ code to find the maximum value in a ROOT RVec.
 
-            # Convert the numpy arrays to awkward arrays
-            pulse_area = ak.from_iter(pulse_area)
-            hit_sds = ak.from_iter(hit_sds)
+        :param input_vector: Name of the input vector.
+        :return: C++ code as a string.
+        """
+        return f"""
+                double findMaxInRVec(const ROOT::RVec<double>& {input_vector}) {{
+                    if ({input_vector}.empty()) {{
+                        return std::numeric_limits<double>::lowest();
+                    }}
+                    double maxVal = {input_vector}[0];
+                    for (const auto& v : {input_vector}) {{
+                        if (v > maxVal) {{
+                            maxVal = v;
+                        }}
+                    }}
+                    return maxVal;
+                }}
+        """
 
-            # Calculate the mean of the pulse area for each hit
-            mean_pulses = ak.mean(pulse_area, axis=2)
-            # Get the index of the hit with the maximum average signal between both layers
-            max_vem_indices = ak.argmax(mean_pulses, axis=1)
+    @staticmethod
+    def findHotSDIndex(input_vector):
+        """
+        Generate C++ code to find the index of the maximum value in a ROOT RVec.
 
-            logger.info("Locating SD at shower core...")
-            # Get the local indices of the hits for each event
-            local_indices = ak.local_index(hit_sds, axis=1)
+        :param input_vector: Name of the input vector.
+        :return: C++ code as a string.
+        """
+        return f"""
+                int findHotSDIndex(const ROOT::RVec<double>& {input_vector}) {{
+                    if ({input_vector}.empty()) {{
+                        return -1;
+                    }}
 
-            logger.info("Success. Returning CLF positions of core SDs.")
-            core_sds = ak.flatten(hit_sds[local_indices == max_vem_indices])
-            sd_core_x = core_sds[:, 0]
-            sd_core_y = core_sds[:, 1]
-            logger.debug(f"SDCoreX: {sd_core_x}")
-            logger.debug(f"SDCoreY: {sd_core_y}")
-            return [{"name": "SDCoreX", "expression": ak.to_numpy(sd_core_x), "init": True},
-                    {"name": "SDCoreY", "expression": ak.to_numpy(sd_core_y), "init": True}]
+                    auto maxIt = std::max_element({input_vector}.begin(), {input_vector}.end());
+                    return std::distance({input_vector}.begin(), maxIt);  
+                }}
+        """
 
-        except Exception as e:
-            logger.error(f"Error in Get Core XXYY: {str(e)}")
-            return []
+    @staticmethod
+    def meanVectorVector(innerVec):
+        """
+        Generate C++ code to calculate the mean of each vector in a vector of vectors.
+
+        :param innerVec: Name of the input vector of vectors.
+        :return: C++ code as a string.
+        """
+        return (f"""
+                std::vector<double> meanVectorVector(const ROOT::RVec<std::vector<double>> &{innerVec}) {{
+                    std::vector<double> mean;
+
+                    for (const auto &v : {innerVec}) {{
+                        double mean_sum = 0;
+                        unsigned int mean_count = v.size();
+
+                        for (const auto &e : v) {{
+                            mean_sum += e;
+                        }}
+
+                        if (mean_count > 0) {{
+                            mean.push_back(mean_sum / mean_count);
+                        }} else {{
+                            mean.push_back(0);
+                        }}
+                    }}
+
+                    return mean;
+                }}
+                """)
 
 
 if __name__ == "__main__":
