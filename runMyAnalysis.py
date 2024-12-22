@@ -24,4 +24,17 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_arguments()
+
+    client = None
+    if args.parallel:
+        logger.warning("Parallel processing with Dask is not supported in this version. Running in serial mode.")
+        # from utils import setup_dask_client
+        # client = setup_dask_client()
+
+    analyzer = DataFrameAnalyzer(args.config_file, args, client)
+
+    # Run the analysis and get the list of histograms
+    my_histograms = analyzer.run_analysis()
+    plot_histograms(my_histograms)
+    # main()

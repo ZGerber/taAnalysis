@@ -1,3 +1,5 @@
 /results/
 .idea/
-analysis/__pycache__/
+/analysis/__pycache__/
+/library/__pycache__/
+/__pycache__/

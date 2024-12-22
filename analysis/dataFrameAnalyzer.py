@@ -27,6 +27,7 @@ class DataFrameAnalyzer:
         self.analysis_file = self.config.get('analysis_file')
         self.tree_name = self.config.get('tree_name')
         self.detector = self.config.get('detector')
+        self.detector_id = self.config.get('detector_id')
 
         # Validate the configuration
         self._validate_config()

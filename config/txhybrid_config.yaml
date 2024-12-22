@@ -9,11 +9,13 @@ analysis_file: "/home/zane/software/new_analysis/txHybridDF/library/txHybrid_com
 detector: "mdtax4"  # Name of the detector to be used in the analysis.
 detectors:
   - name: "mdtax4"  # Name of the first detector.
+    detector_id: "TAX4_MIDDLE_DRUM"
     site_id: 7  # Site ID of the first detector.
     profile: 6  # Profile fit index for the first detector.
-  - name: "brtax4"  # Name of the second detector.
-    site_id: 8  # Site ID of the second detector.
-    profile: 7  # Profile fit index for the second detector.
+  - name: "brtax4"
+    detector_id: "TAX4_BLACK_ROCK"
+    site_id: 8
+    profile: 7
 
 # New columns to define
 new_columns:
@@ -62,6 +64,12 @@ new_columns:
   - name: "Talex00HitSDsXXYY"
     expression: "talex00.xxyy"
 
+  - name: "HybridCoreX"
+    expression: "hctim.mcore[{profile_fit_index}][0]"
+
+  - name: "HybridCoreY"
+    expression: "hctim.mcore[{profile_fit_index}][1]"
+
 # Event Selection Criteria
 cuts:
   - "Xmax > Xlow"
@@ -73,6 +81,7 @@ cuts:
   - "ProfileFitQuality <= 25"
   - "GeometryFitStatus == 0"
   - "GeometryFitQuality <= 15"
+#  - "CoreProximity/1000 <= 5"
 
 # Histogram parameters
 hist_params:
@@ -148,6 +157,18 @@ hist_params:
     show_stats: True
     options:  ~
 
+  - name: "hCoreProximity"
+    title: "Core Proximity"
+    style: "histogram"
+    column: "CoreProximity"
+    bins: 50
+    min: 0
+    max: 100
+    x_title: "Core Proximity [km]"
+    y_title: "Events"
+    show_stats: True
+    options: ~
+
   - name: "pXmaxEnergy"  # Name of the profile plot.
     title: "#LTX_{max}#GT vs. Energy"  # Title of the profile plot.
     style: "profile_plot"  # Style of the plot (profile plot).
@@ -190,12 +211,32 @@ user_functions:
     args:
       - value: "PulseAreaMean"
 
-  - new_column: "HotSDCLF"
+  - new_column: "FD_CLF_X"
+    callable: "getFD_CLF"
+    language: "C++"
+    args:
+      - value: "PulseAreaMean"
+
+  - new_column: "HotSD_CLF"
     callable: ~
     language: ~
     args:
       - value: "HitSDsCLF"
       - value: "HotSDIndex"
+
+  - new_column: "HotSD_CLF_X"
+    callable: ~
+    language: ~
+    args:
+      - value: "HotSD_CLF"
+      - value: "0"
+
+  - new_column: "HotSD_CLF_Y"
+    callable: ~
+    language: ~
+    args:
+      - value: "HotSD_CLF"
+      - value: "1"
 
   - new_column: "HotSDxxyy"
     callable: ~
@@ -203,3 +244,12 @@ user_functions:
     args:
       - value: "HitSDsXXYY"
       - value: "HotSDIndex"
+
+  - new_column: "CoreProximity"
+    callable: "coreProximity"
+    language: "C++"
+    args:
+      - value: "HybridCoreX"
+      - value: "HybridCoreY"
+      - value: "HotSD_CLF_X"
+      - value: "HotSD_CLF_Y"
