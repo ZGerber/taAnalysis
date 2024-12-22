@@ -1,10 +1,6 @@
 # user_functions.py
 
-import numpy as np
 from typing import Optional, List, Union, Any, Dict
-import logging
-import awkward as ak
-import dstpy as dst
 from utils import logger
 
 
@@ -24,7 +20,7 @@ class UserFunctions:
         logger.info("Hello!")
 
     @staticmethod
-    def findMaxInRVec(input_vector):
+    def findMaxInRVec(input_vector: str) -> str:
         """
         Generate C++ code to find the maximum value in a ROOT RVec.
 
@@ -47,7 +43,7 @@ class UserFunctions:
         """
 
     @staticmethod
-    def findHotSDIndex(input_vector):
+    def findHotSDIndex(input_vector: str) -> str:
         """
         Generate C++ code to find the index of the maximum value in a ROOT RVec.
 
@@ -66,7 +62,7 @@ class UserFunctions:
         """
 
     @staticmethod
-    def meanVectorVector(innerVec):
+    def meanVectorVector(innerVec: str) -> str:
         """
         Generate C++ code to calculate the mean of each vector in a vector of vectors.
 
