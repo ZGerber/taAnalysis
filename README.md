@@ -56,7 +56,7 @@ It is assumed that your data is in the form of a ROOT file.
 To run the analysis, execute the main script with the path to the configuration file:
 
 ```bash
-python analysis/dataFrameAnalysis.py /path/to/config.yaml
+python analysis/dataFrameAnalyzer.py /path/to/config.yaml
 ```
 
 ### Detailed Usage Example
@@ -100,7 +100,7 @@ hist_params:
 2. **Run the Analysis**: Execute the main script with the path to your configuration file:
 
 ```bash
-python analysis/dataFrameAnalysis.py /path/to/your/config.yaml
+python analysis/dataFrameAnalyzer.py /path/to/your/config.yaml
 ```
 
 3. **View the Results**: The results, including histograms and any other output, will be saved in the specified output directory.
@@ -116,7 +116,7 @@ The script supports the following command-line options:
 To display the help message, run:
 
 ```bash
-python analysis/dataFrameAnalysis.py -h
+python analysis/dataFrameAnalyzer.py -h
 ```
 
 ## Configuration

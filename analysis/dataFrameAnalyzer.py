@@ -1,10 +1,12 @@
-from example_analysis import UserFunctions
+from library import *
 import dstpy as dst
 import os
+import sys
 import yaml
 import numpy as np
 from typing import List, Dict, Any
-from utils import logger, parse_arguments
+from utils import logger, ConfigError
+import importlib.util
 
 
 class DataFrameAnalyzer:
@@ -19,11 +21,22 @@ class DataFrameAnalyzer:
         self.args = args
         self.client = client
         self.config = self._load_config(config_file)
-        self.input_file = self.config.get('input_file', os.environ.get('ALL_HYBRID'))  # Default to environment variable
-        self.tree_name = self.config.get('tree_name', 'taTree')
-        self.detector = self.config.get('detector', 'None')
+
+        # Load attributes from the config
+        self.input_file = self.config.get('input_file')
+        self.analysis_file = self.config.get('analysis_file')
+        self.tree_name = self.config.get('tree_name')
+        self.detector = self.config.get('detector')
+
+        # Validate the configuration
+        self._validate_config()
+
+        # Initialize the ROOT DataFrame
         self.df = self._load_dataframe()
         logger.info(f"DataFrame for tree {self.tree_name} loaded successfully.")
+
+        # Load and instantiate the class from the analysis_file (Python file)
+        self.user_class_instance = self._load_analysis_class()
 
     @staticmethod
     def _load_config(config_file: str) -> Dict:
@@ -35,6 +48,49 @@ class DataFrameAnalyzer:
         """
         with open(config_file, 'r') as file:
             return yaml.safe_load(file)
+
+    def _validate_config(self):
+        """
+        Validate the required configuration parameters. Raises an error if any are missing.
+
+        :raises ConfigError: If a required configuration parameter is missing.
+        """
+        # Required attributes that must not be None
+        required_config = {
+            'input_file': self.input_file,
+            'analysis_file': self.analysis_file,
+            'tree_name': self.tree_name,
+            'detector': self.detector
+        }
+
+        for param, value in required_config.items():
+            if value is None:
+                raise ConfigError(f"Configuration error: '{param}' cannot be None.")
+
+    def _load_analysis_class(self) -> Any:
+        """
+        Dynamically load and instantiate the class from the analysis_file.
+
+        :param analysis_file: Path to the Python file containing the class.
+        :return: Instance of the class found in the file.
+        """
+        # Extract the module name from the file path
+        module_name = os.path.basename(self.analysis_file).replace(".py", "")
+
+        # Load the module dynamically using importlib
+        spec = importlib.util.spec_from_file_location(module_name, self.analysis_file)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+
+        # Find the first class defined in the module (assuming only one class)
+        classes = [cls for cls in module.__dict__.values() if isinstance(cls, type)]
+        if len(classes) != 1:
+            logger.error(f"Expected a single class in {self.analysis_file}, but found {len(classes)} classes.")
+            sys.exit(1)
+
+        # Instantiate the class and return it
+        return classes[0]()
 
     @property
     def _profile_fit_index(self) -> int:
@@ -238,12 +294,13 @@ class DataFrameAnalyzer:
         func_arg_list = [arg['value'] for arg in func_args]
         func_arg_csv = ', '.join(func_arg_list)
 
-        user_func_instance = UserFunctions()
+        self.user_class_instance = self._load_analysis_class()
 
         if not func_call and language in ['ROOT', 'RDF', 'direct', 'None', None]:
             new_column_info = {'name': new_column, 'expression': f"{func_arg_list[0]}[{func_arg_list[1]}]"}
-        elif hasattr(user_func_instance, func_call):
-            func = getattr(user_func_instance, func_call)
+
+        elif hasattr(self.user_class_instance, func_call):
+            func = getattr(self.user_class_instance, func_call)
             logger.info(f"Running user function {func_call} with arguments: {func_arg_list}")
 
             if language in ['C++', 'cpp', 'c++', 'cxx']:
@@ -309,31 +366,6 @@ def plot_histograms(histograms: List[dst.ROOT.TH1F]) -> None:
         input("Press Enter to continue...")
 
 
-def main():
-    """
-    Main function to run the analysis.
-
-    :return: None
-    """
-    args = parse_arguments()
-
-    client = None
-    if args.parallel:
-        logger.warning("Parallel processing with Dask is not supported in this version. Running in serial mode.")
-        # from utils import setup_dask_client
-        # client = setup_dask_client()
-
-    analyzer = DataFrameAnalyzer(args.config_file, args, client)
-
-    # Run the analysis and get the list of histograms
-    my_histograms = analyzer.run_analysis()
-
-    # Save histograms, if needed
-    analyzer.save_histograms(my_histograms)
-
-    # Plot the histograms on a ROOT canvas
-    plot_histograms(my_histograms)
-
-
 if __name__ == "__main__":
-    main()
+    logger.error("This module should not be run directly. Import it as a module.")
+    sys.exit(1)
