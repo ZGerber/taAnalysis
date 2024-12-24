@@ -1,4 +1,4 @@
-# txHybrid_composition.py
+# txHybrid_spectrum.py
 
 
 class TAx4HybridSpectrumFunctions:

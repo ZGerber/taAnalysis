@@ -1,7 +1,7 @@
-import colorlog
-import logging
 import argparse
-import sys
+import logging
+
+import colorlog
 
 
 def setup_logger():
@@ -51,10 +51,24 @@ def parse_arguments():
 
     :return: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="Run the DataFrame analysis with a specified YAML configuration file.")
-    parser.add_argument("config_file", type=str, help="Path to the YAML configuration file.")
-    parser.add_argument("-r", "--report", action="store_true", help="Print the efficiency report after applying cuts.")
-    parser.add_argument("-p", "--parallel", action="store_true", help="Use parallel processing with Dask.")
+    detectors = ["mdtax4fd", "mdtax4sd", "brtax4fd", "brtax4sd", "mdfd", "talefd", "tasd", "brm", "lr"]
+    parser = argparse.ArgumentParser(description="Run the DataFrame my_analysis with a specified YAML configuration file.")
+    parser.add_argument("config_file",
+                        type=str,
+                        help="Path to the YAML configuration file.")
+    # parser.add_argument("detector", type=str, choices=detectors, help="Choose detector.")
+    parser.add_argument("-r", "--report",
+                        action="store_true",
+                        help="Print the efficiency report after applying cuts.")
+    parser.add_argument("-n", "--no_save",
+                        action="store_true",
+                        help="Plots are saved by default. If this option selected, plots will not be saved.")
+    parser.add_argument("-d", "--draw",
+                        action="store_true",
+                        help="Display plots after completing analysis.")
+    parser.add_argument("-p", "--parallel",
+                        action="store_true",
+                        help="Use parallel processing with Dask [not yet implemented].")
     return parser.parse_args()
 
 
@@ -84,24 +98,3 @@ def setup_dask_client(n_workers: int = 4, threads_per_worker: int = 1, memory_li
 
     return client
 
-
-class ConfigError(Exception):
-    """Exception raised when a required configuration is missing."""
-
-    def __init__(self, missing_parameter):
-        self.missing_parameter = missing_parameter
-        self._log_error()
-
-    def _log_error(self):
-        """
-        Log the error when a missing configuration parameter is encountered.
-        """
-        logger.error(f"Configuration error: '{self.missing_parameter}' cannot be None.")
-        sys.exit(1)
-
-    def __str__(self):
-        """
-        String representation of the error. When the exception is printed,
-        this will be shown.
-        """
-        return f"Configuration error: '{self.missing_parameter}' cannot be None."

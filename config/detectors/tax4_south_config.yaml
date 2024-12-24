@@ -1,0 +1,8 @@
+# tax4_south_config.yaml
+
+name: "brtax4"
+detector_id: "TAX4_BLACK_ROCK"
+site_id: 8
+clf_x: 17058.8805
+clf_y: -12031.6169
+clf_z: -10.2295387

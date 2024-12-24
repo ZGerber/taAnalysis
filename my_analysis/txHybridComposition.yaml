@@ -1,41 +1,38 @@
-# txhybid_config.yaml
+  # txhybid_config.yaml
 
 input_file: ${ALL_HYBRID}  # Path to the input ROOT file containing the data.
 tree_name: "taTree"  # Name of the ROOT TTree to be analyzed.
 output_dir: "/home/zane/software/new_analysis/txHybridDF/results"  # Directory to save the output results.
-analysis_file: "/home/zane/software/new_analysis/txHybridDF/library/txHybrid_composition.py"  # Path to the analysis file.
+library_file: "/home/zane/software/new_analysis/txHybridDF/library/txHybridComposition.py"  # Path to the my_analysis file.
+detector_config: "/home/zane/software/new_analysis/txHybridDF/config/detectors/tax4_north_config.yaml"  # Path to the detector configuration file.
+custom_analysis: ~  # Path to the custom user functions python file.
 
-# Detector settings
-detector: "mdtax4"  # Name of the detector to be used in the analysis.
-detectors:
-  - name: "mdtax4"  # Name of the first detector.
-    detector_id: "TAX4_MIDDLE_DRUM"
-    site_id: 7  # Site ID of the first detector.
-    profile: 6  # Profile fit index for the first detector.
-  - name: "brtax4"
-    detector_id: "TAX4_BLACK_ROCK"
-    site_id: 8
-    profile: 7
+# Detector settings.  Do not change this section.
+# It is loaded automatically from the detector_config file.
+detector: null
+
+# The following setting is required for FD/Hybrid only. [0-15]
+profile_fit_index: 6
 
 # New columns to define
 new_columns:
   - name: "Xmax"  # Name of the new column.
-    expression: "prfc.xm[{profile_fit_index}]"  # Expression to calculate the values of the new column.
+    expression: "prfc.xm[profile_fit_index]"  # Expression to calculate the values of the new column.
 
   - name: "Xlow"
-    expression: "prfc.dep[{profile_fit_index}][0]"
+    expression: "prfc.dep[profile_fit_index][0]"
 
   - name: "Xhigh"
-    expression: "prfc.dep[{profile_fit_index}][prfc.nbin[{profile_fit_index}]-1]"
+    expression: "prfc.dep[profile_fit_index][prfc.nbin[profile_fit_index]-1]"
 
   - name: "LogEnergy"
-    expression: "18. + TMath::Log10(prfc.eng[{profile_fit_index}])"
+    expression: "18. + TMath::Log10(prfc.eng[profile_fit_index])"
 
   - name: "Zenith"
-    expression: "TMath::RadToDeg()*hctim.mthe[{profile_fit_index}]"
+    expression: "TMath::RadToDeg()*hctim.mthe[profile_fit_index]"
 
   - name: "Psi"
-    expression: "TMath::RadToDeg()*hctim.mpsi[{profile_fit_index}]"
+    expression: "TMath::RadToDeg()*hctim.mpsi[profile_fit_index]"
 
   - name: "PulseArea"
     expression: "tlfptn.pulsa"
@@ -44,16 +41,16 @@ new_columns:
     expression: "tlfptn.nhits"
 
   - name: "GeometryFitStatus"
-    expression: "hctim.failmode[{profile_fit_index}]"
+    expression: "hctim.failmode[profile_fit_index]"
 
   - name: "ProfileFitStatus"
-    expression: "prfc.failmode[{profile_fit_index}]"
+    expression: "prfc.failmode[profile_fit_index]"
 
   - name: "GeometryFitQuality"
-    expression: "hctim.mchi2[{profile_fit_index}] / (prfc.nbin[{profile_fit_index}] - 2)"
+    expression: "hctim.mchi2[profile_fit_index] / (prfc.nbin[profile_fit_index] - 2)"
 
   - name: "ProfileFitQuality"
-    expression: "prfc.chi2[{profile_fit_index}] / prfc.ndf[{profile_fit_index}]"
+    expression: "prfc.chi2[profile_fit_index] / prfc.ndf[profile_fit_index]"
 
   - name: "HitSDsXXYY"
     expression: "tlfptn.xxyy"
@@ -64,11 +61,11 @@ new_columns:
   - name: "Talex00HitSDsXXYY"
     expression: "talex00.xxyy"
 
-  - name: "HybridCoreX"
-    expression: "hctim.mcore[{profile_fit_index}][0]"
+  - name: "HybridCoreX_FD"
+    expression: "hctim.mcore[profile_fit_index][0]"
 
-  - name: "HybridCoreY"
-    expression: "hctim.mcore[{profile_fit_index}][1]"
+  - name: "HybridCoreY_FD"
+    expression: "hctim.mcore[profile_fit_index][1]"
 
 # Event Selection Criteria
 cuts:
@@ -81,7 +78,7 @@ cuts:
   - "ProfileFitQuality <= 25"
   - "GeometryFitStatus == 0"
   - "GeometryFitQuality <= 15"
-#  - "CoreProximity/1000 <= 5"
+  - "CoreProximity <= 5"
 
 # Histogram parameters
 hist_params:
@@ -163,7 +160,7 @@ hist_params:
     column: "CoreProximity"
     bins: 50
     min: 0
-    max: 100
+    max: 25
     x_title: "Core Proximity [km]"
     y_title: "Events"
     show_stats: True
@@ -192,62 +189,74 @@ hist_params:
     show_stats: True  # Display statistics box on the plot.
     options: ""  # Additional options for the profile plot.
 
+# Specify the new columns to be defined via the user-defined functions.
+# The callable functions must be defined in the my_analysis file.
+# If callable is set to null:
+    # One param given: Not yet defined.
+    # Two params given: The new column is defined by a slice: value1[value2].
+    # Three or more params given: Not yet defined.
 user_functions:
   - new_column: "PulseAreaMean"
-    callable: "meanVectorVector"
-    language: "C++"
+    callable: "calculateMeanOfVectors"
     args:
       - value: "PulseArea"
 
   - new_column: "HotSDSignal"
     callable: "findMaxInRVec"
-    language: "C++"
     args:
       - value: "PulseAreaMean"
 
   - new_column: "HotSDIndex"
-    callable: "findHotSDIndex"
-    language: "C++"
+    callable: "findMaxIndex"
     args:
       - value: "PulseAreaMean"
 
   - new_column: "FD_CLF_X"
-    callable: "getFD_CLF"
-    language: "C++"
+    callable: ~
     args:
-      - value: "PulseAreaMean"
+      - value: "fd_clf_x"
+
+  - new_column: "FD_CLF_Y"
+    callable: ~
+    args:
+      - value: "fd_clf_y"
 
   - new_column: "HotSD_CLF"
     callable: ~
-    language: ~
     args:
       - value: "HitSDsCLF"
       - value: "HotSDIndex"
 
   - new_column: "HotSD_CLF_X"
     callable: ~
-    language: ~
     args:
       - value: "HotSD_CLF"
       - value: "0"
 
   - new_column: "HotSD_CLF_Y"
     callable: ~
-    language: ~
     args:
       - value: "HotSD_CLF"
       - value: "1"
 
+  - new_column: "HybridCoreX"
+    callable: ~
+    args:
+      - value: "HybridCoreX_FD + FD_CLF_X"
+
+  - new_column: "HybridCoreY"
+    callable: ~
+    args:
+      - value: "HybridCoreY_FD + FD_CLF_Y"
+
   - new_column: "HotSDxxyy"
     callable: ~
-    language: ~
     args:
       - value: "HitSDsXXYY"
       - value: "HotSDIndex"
 
   - new_column: "CoreProximity"
     callable: "coreProximity"
-    language: "C++"
     args:
       - value: "HybridCoreX"
       - value: "HybridCoreY"

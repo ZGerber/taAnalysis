@@ -1,8 +1,7 @@
-# txHybrid_composition.py
-import TLPY
+# txHybridComposition.py
 
 
-class TAx4HybridCompositionFunctions:
+class TAx4HybridComposition:
     """
     A class that contains various utility functions for generating C++ code
     related to ROOT RVec operations.
@@ -32,7 +31,7 @@ class TAx4HybridCompositionFunctions:
         """
 
     @staticmethod
-    def findHotSDIndex(input_vector: str) -> str:
+    def findMaxIndex(input_vector: str) -> str:
         """
         Generate C++ code to find the index of the maximum value in a ROOT RVec.
 
@@ -40,7 +39,7 @@ class TAx4HybridCompositionFunctions:
         :return: C++ code as a string.
         """
         return f"""
-                int findHotSDIndex(const ROOT::RVec<double>& {input_vector}) {{
+                int findMaxIndex(const ROOT::RVec<double>& {input_vector}) {{
                     if ({input_vector}.empty()) {{
                         return -1;
                     }}
@@ -51,7 +50,7 @@ class TAx4HybridCompositionFunctions:
         """
 
     @staticmethod
-    def meanVectorVector(innerVec: str) -> str:
+    def calculateMeanOfVectors(innerVec: str) -> str:
         """
         Generate C++ code to calculate the mean of each vector in a vector of vectors.
 
@@ -59,7 +58,7 @@ class TAx4HybridCompositionFunctions:
         :return: C++ code as a string.
         """
         return f"""
-                std::vector<double> meanVectorVector(const ROOT::RVec<std::vector<double>> &{innerVec}) {{
+                std::vector<double> calculateMeanOfVectors(const ROOT::RVec<std::vector<double>> &{innerVec}) {{
                     std::vector<double> mean;
 
                     for (const auto &v : {innerVec}) {{
@@ -99,7 +98,7 @@ class TAx4HybridCompositionFunctions:
                     return TMath::Sqrt(
                         TMath::Power({HybridCoreX} - {HotSD_CLF_X}, 2) + 
                         TMath::Power({HybridCoreY} - {HotSD_CLF_Y}, 2)
-                    ) / 1000;
+                    ) / 1000.;
                 }}
                 """
 
@@ -113,8 +112,16 @@ class TAx4HybridCompositionFunctions:
         :return: C++ code for the function as a string.
         """
         return f"""
-                void getFD_CLF(const std::string &{det_name}, double fd_xyz_clf[3]) {{
+                void getFD_CLF(const std::string &{det_name}) {{
+                    double fd_xyz_clf[3];
                     return TLUTI_DETECTORS::get_fd_xyz_clf({det_name}, fd_xyz_clf);
                 }}
                 """
 
+    @staticmethod
+    def addConstant_to_RVec(input_vector: str, constant: str) -> str:
+        return f"""
+                void addConstant_to_RVec(double {input_vector}, const double {constant}) {{
+                    return {input_vector} + {constant};
+                }}
+                """

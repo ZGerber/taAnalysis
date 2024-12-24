@@ -4,11 +4,8 @@ input_file: "/full/path/to/input_file"
 tree_name: "tree_name"
 output_dir: "/full/path/to/output_directory"
 
-# Detector settings
-detector: ""
-fit_ids:
-  detector1: 6
-  detector2: 7
+# Do not change. This is the default value.
+detector: null
 
 # New columns to define
 new_columns:
@@ -69,7 +66,5 @@ user_functions:
   - name: "Example Function"
     callable: "name_of_method"
     args:
-      - name: "column1"
-        value: "EXAMPLE_COLUMN"
-      - name: "column2"
-        value: "ANOTHER_EXAMPLE_COLUMN"
+      - value: "EXAMPLE_COLUMN"
+      - value: "ANOTHER_EXAMPLE_COLUMN"

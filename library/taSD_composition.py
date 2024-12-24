@@ -1,4 +1,4 @@
-# txHybrid_composition.py
+# taSD_composition.py
 
 
 class TASDCompositionFunctions:
