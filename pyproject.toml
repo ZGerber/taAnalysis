@@ -6,7 +6,7 @@ version = "1.0.0"
 description = "A simple, easy-to-use interface for Telescope Array (TA) data analysis."
 
 dependencies = [
-    "python = >=3.8",
+    "python >=3.8",
     "root",
     "pyyaml",
     "colorlog"
