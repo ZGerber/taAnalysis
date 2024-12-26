@@ -3,24 +3,31 @@
 input_file: "/full/path/to/input_file"
 tree_name: "tree_name"
 output_dir: "/full/path/to/output_directory"
+detector_config: "/full/path/to/detector_config.yaml"
+library_file: "/full/path/to/library_file.py"
+custom_analysis: "/full/path/to/custom_analysis.py"
 
 # Do not change. This is the default value.
 detector: null
 
+profile_fit_index: 7
+
 # New columns to define
 new_columns:
   - name: "EXAMPLE_COLUMN"
-    expression: "example.dst.variable[{example_index}]"
+    expression: "example.dst.variable[example_index]"
 
   - name: "ANOTHER_EXAMPLE_COLUMN"
-    expression: "another_example.dst.variable[{another_index}][0]"
+    expression: "another_example.dst.variable[example_index][0]"
+
+  - name: "YET_ANOTHER_EXAMPLE_COLUMN"
+    expression: "TMath::RadToDeg()*yet_another_example.dst.variable[example_index][0]"
 
 # Event Selection Criteria
 cuts:
   - "EXAMPLE_COLUMN > 500"
   - "ANOTHER_EXAMPLE_COLUMN < TMath::Pi()"
-  - "YET_ANOTHER_EXAMPLE > 4/3"
-
+  - "YET_ANOTHER_EXAMPLE_COLUMN > 4/3"
 
 # Histogram parameters
 hist_params:
@@ -63,8 +70,20 @@ hist_params:
 
 # For methods defined in the UserFunctions class:
 user_functions:
-  - name: "Example Function"
+  - new_column: "COLUMN_DEFINED_BY_FUNCTION"
     callable: "name_of_method"
     args:
       - value: "EXAMPLE_COLUMN"
       - value: "ANOTHER_EXAMPLE_COLUMN"
+
+  - new_column: "COLUMN_THAT_DEPENDS_ON_A_SECONDARY_COLUMN"
+    callable: ~
+    args:
+      - value: "EXAMPLE_COLUMN + COLUMN_DEFINED_BY_FUNCTION"
+
+  - new_column: "COLUMN_DEFINED_BY_SLICE"
+    callable: ~
+    args:
+      - value: "COLUMN_TO_BE_SLICED"
+      - value: "CONDITION"
+

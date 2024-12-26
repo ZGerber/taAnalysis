@@ -1,4 +1,4 @@
-  # txhybid_config.yaml
+# txhybid_config.yaml
 
 input_file: ${ALL_HYBRID}  # Path to the input ROOT file containing the data.
 tree_name: "taTree"  # Name of the ROOT TTree to be analyzed.
