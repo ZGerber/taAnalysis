@@ -1,0 +1,15 @@
+[tool]
+[project]
+name = "taAnalysis"
+version = "1.0.0"
+description = "A simple, easy-to-use interface for Telescope Array (TA) data analysis."
+
+[project.dependencies]
+python = "^3.8"
+root = "*"
+dstpy = "*"
+pyyaml = "*"
+colorlog = "*"
+
+[project.scripts]
+runMyAnalysis = "runMyAnalysis:main"
