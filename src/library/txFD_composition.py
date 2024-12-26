@@ -1,4 +1,4 @@
-# txHybrid_composition.py
+# txFD_composition.py
 
 
 class TAx4FDCompositionFunctions:
