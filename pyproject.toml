@@ -1,17 +1,19 @@
-[tool]
+[project.scripts]
+runMyAnalysis = "src.runMyAnalysis:main"
 
 [project]
 name = "taAnalysis"
 version = "1.0.0"
 description = "A simple, easy-to-use interface for Telescope Array (TA) data analysis."
-
+requires-python = ">=3.8"
 dependencies = [
-    "python >=3.8",
-    "root",
     "pyyaml",
     "colorlog"
 ]
 
-[project.scripts]
-runMyAnalysis = "src/runMyAnalysis:main"
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+packages = ["src"]
