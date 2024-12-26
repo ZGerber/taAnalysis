@@ -7,7 +7,7 @@ description = "A simple, easy-to-use interface for Telescope Array (TA) data ana
 
 dependencies = [
     "python = '>=3.8'",
-    "root"
+    "root",
     "pyyaml",
     "colorlog"
 ]
