@@ -1,8 +1,0 @@
-# tax4_north_config.yaml
-
-name: "mdtax4"
-detector_id: "TAX4_MIDDLE_DRUM"
-site_id: 7
-clf_x: -7335.10399509
-clf_y: 19558.32355601
-clf_z: 183.75262227
