@@ -1,19 +1,19 @@
 [project.scripts]
 runMyAnalysis = "src.runMyAnalysis:main"
 
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "taAnalysis"
 version = "1.0.0"
-description = "A simple, easy-to-use interface for Telescope Array (TA) data analysis."
+description = "A simple, easy-to-use interface for HEP data analysis using ROOT's RDataFrame. Designed for use by the Telescope Array Collaboration"
 requires-python = ">=3.8"
 dependencies = [
     "pyyaml",
     "colorlog"
 ]
 
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [tool.setuptools]
-packages = ["src"]
+packages = ["src", "src.config", "src.library", "src.my_analysis", "src.rdf_analyzer"]
