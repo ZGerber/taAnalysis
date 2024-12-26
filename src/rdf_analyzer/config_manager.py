@@ -3,7 +3,7 @@ import sys
 
 import yaml
 
-from rdf_analyzer.utils import logger
+from src.rdf_analyzer.utils import logger
 
 
 class ConfigManager:

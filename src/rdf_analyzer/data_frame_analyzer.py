@@ -6,12 +6,12 @@ import os
 
 import dstpy as dst
 
-from rdf_analyzer.config_manager import ConfigManager
-from rdf_analyzer.data_frame_manager import DataFrameManager
-from rdf_analyzer.histogram_manager import HistogramManager
-from rdf_analyzer.library_manager import LibraryFunctionHandler
+from src.rdf_analyzer.config_manager import ConfigManager
+from src.rdf_analyzer.data_frame_manager import DataFrameManager
+from src.rdf_analyzer.histogram_manager import HistogramManager
+from src.rdf_analyzer.library_manager import LibraryFunctionHandler
 
-from rdf_analyzer.utils import logger
+from src.rdf_analyzer.utils import logger
 
 
 class DataFrameAnalyzer:

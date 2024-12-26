@@ -3,7 +3,7 @@ from typing import List, Dict, Any
 import dstpy as dst
 import numpy as np
 
-from rdf_analyzer.utils import logger
+from src.rdf_analyzer.utils import logger
 
 
 class DataFrameManager:

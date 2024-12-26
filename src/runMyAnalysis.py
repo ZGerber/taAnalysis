@@ -1,6 +1,6 @@
-from rdf_analyzer.data_frame_analyzer import DataFrameAnalyzer
-from rdf_analyzer.histogram_manager import HistogramManager
-from rdf_analyzer.utils import logger, parse_arguments
+from src.rdf_analyzer.data_frame_analyzer import DataFrameAnalyzer
+from src.rdf_analyzer.histogram_manager import HistogramManager
+from src.rdf_analyzer.utils import logger, parse_arguments
 
 
 def main():

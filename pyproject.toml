@@ -1,7 +1,7 @@
 [project]
 name = "taAnalysis"
 version = "1.0.0"
-description = "A simple, easy-to-use interface for HEP data analysis using ROOT's RDataFrame."
+description = "An easy-to-use interface for HEP data analysis using ROOT's RDataFrame."
 requires-python = ">=3.8"
 dependencies = [
     "pyyaml",

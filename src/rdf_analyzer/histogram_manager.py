@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import dstpy as dst
 
-from rdf_analyzer.utils import logger
+from src.rdf_analyzer.utils import logger
 
 
 class HistogramManager:
