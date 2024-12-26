@@ -2,7 +2,9 @@
 
 ## Introduction
 
-`taAnalysis` is a simple, easy-to-use interface for Telescope Array (TA) data analysis. The program allows users to provide a YAML configuration file that guides the analysis process. The program reads data from a ROOT tree, creates an RDataFrame, fills columns, applies cuts, produces plots, and saves them. Users can perform more complex operations by using the C++ functions defined in the `library/` folder. The library is prepopulated with functions for common analysis tasks, but users can add more functions by writing them in the `custom_functions` module. The functions in the library are written in Python, but they return entire C++ functions as a string. By default, RDataFrame stores objects in an object called an RVec, which allows users to perform vectorized calculations.
+`taAnalysis` is a simple, easy-to-use interface for Telescope Array (TA) data analysis. The program allows users to provide a YAML configuration file that guides the analysis process. The program reads data from a ROOT tree, creates an RDataFrame, fills columns, applies cuts, produces plots, and saves them. 
+
+Users can perform more complex operations by using the C++ functions defined in the `library/` folder. The library is prepopulated with functions for common analysis tasks, but users can add more functions by writing them in the `custom_functions` module. The functions in the library are written in Python, but they return entire C++ functions as a string.
 
 ## Installation
 
