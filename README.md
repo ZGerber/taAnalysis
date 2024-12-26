@@ -56,7 +56,7 @@ It is assumed that your data is in the form of a ROOT file.
 To run the analysis, execute the main script with the path to the configuration file:
 
 ```bash
-python my_analysis/data_frame_analyzer.py /path/to/config.yaml
+runMyAnalysis /path/to/config.yaml
 ```
 
 ### Detailed Usage Example
@@ -95,12 +95,21 @@ hist_params:
     y_title: "Frequency"
     show_stats: True
     options: ~
+
+user_functions:
+  - name: "My Custom Function"
+    callable: "my_custom_function"
+    args:
+      - name: "column1"
+        value: "ExistingColumn1"
+      - name: "column2"
+        value: "ExistingColumn2"
 ```
 
 2. **Run the Analysis**: Execute the main script with the path to your configuration file:
 
 ```bash
-python my_analysis/data_frame_analyzer.py /path/to/your/config.yaml
+runMyAnalysis /path/to/your/config.yaml
 ```
 
 3. **View the Results**: The results, including histograms and any other output, will be saved in the specified output directory.
@@ -112,11 +121,14 @@ The script supports the following command-line options:
 - `config_file`: Path to the YAML configuration file.
 - `-h` or `--help`: Display the help message.
 - `-r` or `--report`: Print the efficiency report after applying cuts.
+- `-n` or `--no_save`: Plots are saved by default. If this option is selected, plots will not be saved.
+- `-d` or `--draw`: Display plots after completing analysis.
+- `-p` or `--parallel`: Use parallel processing with Dask [not yet implemented].
 
 To display the help message, run:
 
 ```bash
-python my_analysis/data_frame_analyzer.py -h
+runMyAnalysis -h
 ```
 
 ## Configuration
@@ -158,6 +170,15 @@ hist_params:
     y_title: "Events"
     show_stats: True
     options: ~
+
+user_functions:
+  - name: "My Custom Function"
+    callable: "my_custom_function"
+    args:
+      - name: "column1"
+        value: "ExistingColumn1"
+      - name: "column2"
+        value: "ExistingColumn2"
 ```
 
 ### Configuration Options
@@ -172,6 +193,7 @@ The configuration file allows users to specify various parameters for the analys
 - **new_columns**: List of new columns to define in the dataframe.
 - **cuts**: List of event selection criteria.
 - **hist_params**: List of histogram parameters.
+- **user_functions**: List of user-defined functions to apply during the analysis.
 
 ### New Columns
 
