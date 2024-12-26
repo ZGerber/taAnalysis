@@ -117,10 +117,18 @@ user_functions:
 ```
 
 
-## Details about `src/library/txHybridComposition.py`
+## Details about `src/library/`
 
-The `txHybridComposition.py` file contains a classes that provide various utility functions for generating C++ code related to ROOT RVec operations. These functions are used to perform vectorized calculations on data stored in ROOT RVecs. Below is an example of the functions provided in these files:
+The `library/` directory contains various utility functions for generating C++ code related to ROOT RVec operations. 
 
+ROOT currently supports vectorized operations on fundamental data types and RVec's thereof. However, data will often be deeply nested. 
+Since RVec is only capable of 'hiding' the first layer, the remaining layers will be non-compatible data types such as `std::<vector<>>`.
+
+To solve this, the user must loop over entries manually. Fortunately, most of these tasks can be accomplished with boilerplate code, reducing
+or eliminating the user's need to know C++. Some of these predefined functions have been placed in `library/` and organized by the type of anlaysis
+being conducted (TA-specific). More will be added as development continues.
+
+An example is below: 
 
 ### `calculateMeanOfVectors`
 
