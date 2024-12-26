@@ -4,3 +4,4 @@ my_analysis/__pycache__/
 library/__pycache__/
 __pycache__/
 rdf_analyzer/oldAnalyzer.py
+!/txhybrid/
