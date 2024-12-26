@@ -2,9 +2,9 @@
 
 input_file: ${ALL_HYBRID}  # Path to the input ROOT file containing the data.
 tree_name: "taTree"  # Name of the ROOT TTree to be analyzed.
-output_dir: "/home/zane/software/new_analysis/txHybridDF/results"  # Directory to save the output results.
-library_file: "/home/zane/software/new_analysis/txHybridDF/library/txHybridComposition.py"  # Path to the my_analysis file.
-detector_config: "/home/zane/software/new_analysis/txHybridDF/config/detectors/tax4_north_config.yaml"  # Path to the detector configuration file.
+output_dir: "/home/zane/software/taAnalysis/results/data/south"  # Directory to save the output results.
+library_file: "/home/zane/software/taAnalysis/src/library/txHybridComposition.py"  # Path to the my_analysis file.
+detector_config: "/home/zane/software/taAnalysis/src/config/detectors/tax4_south_config.yaml"  # Path to the detector configuration file.
 custom_analysis: ~  # Path to the custom user functions python file.
 
 # Detector settings.  Do not change this section.
@@ -12,7 +12,7 @@ custom_analysis: ~  # Path to the custom user functions python file.
 detector: null
 
 # The following setting is required for FD/Hybrid only. [0-15]
-profile_fit_index: 6
+profile_fit_index: 7
 
 # New columns to define
 new_columns:
