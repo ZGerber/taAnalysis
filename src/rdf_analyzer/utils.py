@@ -52,7 +52,7 @@ def parse_arguments():
     :return: Parsed arguments.
     """
     detectors = ["mdtax4fd", "mdtax4sd", "brtax4fd", "brtax4sd", "mdfd", "talefd", "tasd", "brm", "lr"]
-    parser = argparse.ArgumentParser(description="Run the DataFrame my_analysis with a specified YAML configuration file.")
+    parser = argparse.ArgumentParser(description="Run the DataFrame analysis with a specified YAML configuration file.")
     parser.add_argument("config_file",
                         type=str,
                         help="Path to the YAML configuration file.")
@@ -62,7 +62,7 @@ def parse_arguments():
                         help="Print the efficiency report after applying cuts.")
     parser.add_argument("-n", "--no_save",
                         action="store_true",
-                        help="Plots are saved by default. If this option selected, plots will not be saved.")
+                        help="Plots will not be saved. (Plots are saved by default.)")
     parser.add_argument("-d", "--draw",
                         action="store_true",
                         help="Display plots after completing analysis.")
