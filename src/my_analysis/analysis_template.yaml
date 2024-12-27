@@ -1,6 +1,6 @@
 # example_config.yaml
 
-input_file: "/full/path/to/input_file"
+input_file: "/full/path/to/input_file.root"
 tree_name: "tree_name"
 output_dir: "/full/path/to/output_directory"
 detector_config: "/full/path/to/detector_config.yaml"
@@ -10,7 +10,8 @@ custom_analysis: "/full/path/to/custom_analysis.py"
 # Do not change. This is the default value.
 detector: null
 
-profile_fit_index: 7
+# This must be set for TAFD analyses.
+profile_fit_index: 
 
 # New columns to define
 new_columns:
