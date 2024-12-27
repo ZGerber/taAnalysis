@@ -28,7 +28,7 @@ To install `taAnalysis`, follow these steps:
 
 To run the program, use the following command:
 ```sh
-tadf_run <path_to_yaml_config_file>
+runMyAnalysis <path_to_yaml_config_file>
 ```
 
 ### Command-line Arguments
