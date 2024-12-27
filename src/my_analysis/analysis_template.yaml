@@ -10,7 +10,8 @@ custom_analysis: "/full/path/to/custom_analysis.py"
 # Do not change. This is the default value.
 detector: null
 
-profile_fit_index: 7
+# This must be set for TAFD analyses.
+profile_fit_index: 
 
 # New columns to define
 new_columns:
