@@ -5,3 +5,5 @@ library/__pycache__/
 __pycache__/
 rdf_analyzer/oldAnalyzer.py
 txhybrid/
+build/
+taAnalysis.egg-info/
