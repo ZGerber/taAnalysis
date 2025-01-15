@@ -1,6 +1,5 @@
 import numpy as np
 import argparse
-import dstpy
 from pathlib import Path
 
 
@@ -27,6 +26,7 @@ def parse_user_args():
 
 def load_data(file_path, column_names, tree_name="taTree"):
     """Load the data from the ROOT file using RDataFrame"""
+    import dstpy
     rdf = dstpy.ROOT.RDataFrame(tree_name, file_path)
     if column_names:
         return rdf.AsNumpy(column_names)
@@ -35,7 +35,7 @@ def load_data(file_path, column_names, tree_name="taTree"):
 
 def main():
     args = parse_user_args()
-    data = load_data(args.file_path, args.column_names)
+    data = load_data(args.file_path, args.column_names, args.tree_name)
     np.savez(f"{Path(args.file_path).stem}.npz", **data)
 
 
