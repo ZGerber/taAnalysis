@@ -14,6 +14,7 @@ build-backend = "setuptools.build_meta"
 
 [project.scripts]
 runMyAnalysis = "src.runMyAnalysis:main"
+rt2npz = "src.rt2npz:main"
 
 [tool.setuptools]
 packages = ["src", "src.config", "src.library", "src.my_analysis", "src.rdf_analyzer"]

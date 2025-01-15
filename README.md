@@ -22,6 +22,7 @@ To install `taAnalysis`, follow these steps:
     ```
 
 3. Ensure you have ROOT installed. You can download and install ROOT from [here](https://root.cern/install/).
+
 4. For Telescope Array analysis, `dstpy` will also be required. You can get this from the dst2k-ta-pro software package.
 
 ## Usage

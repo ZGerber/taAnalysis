@@ -1,5 +1,4 @@
 from src.rdf_analyzer.data_frame_analyzer import DataFrameAnalyzer
-from src.rdf_analyzer.histogram_manager import HistogramManager
 from src.rdf_analyzer.utils import logger, parse_arguments
 
 
@@ -12,19 +11,25 @@ def main():
         # from rdf_analyzer import setup_dask_client
         # client = setup_dask_client()
 
-    analyzer = DataFrameAnalyzer(args, client)
+    my_analysis = DataFrameAnalyzer(args, client)
 
     # Run the my_analysis and get the list of histograms
-    my_histograms = analyzer.run_analysis()
+    my_histograms = my_analysis.run_analysis()
 
-    histogram_manager = HistogramManager(analyzer.df_handler.output_dir)
-    # Save histograms, if needed
+    # Save histograms, unless the user specifies not to
     if not args.no_save:
-        histogram_manager.save_histograms(my_histograms)
+        my_analysis.histogram_manager.save_histograms(my_histograms)
 
     # Plot the histograms on a ROOT canvas
     if args.draw:
-        histogram_manager.plot_histograms(my_histograms)
+        my_analysis.histogram_manager.plot_histograms(my_histograms)
+
+    # Print the efficiency report
+    if args.report:
+        my_analysis.df_manager.df.Report().Print()
+
+    # Save the DataFrame of good events
+    my_analysis.df_manager.save_df(my_analysis.df_manager.output_dir)
 
 
 if __name__ == "__main__":

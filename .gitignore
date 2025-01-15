@@ -7,3 +7,4 @@ rdf_analyzer/oldAnalyzer.py
 txhybrid/
 build/
 taAnalysis.egg-info/
+processed_tree.npz

@@ -26,13 +26,14 @@ class DataFrameAnalyzer:
         self.config = self.config_manager.config
 
         # Initialize other components
-        self.df_handler = DataFrameManager(self.config['tree_name'],
+        self.df_manager = DataFrameManager(self.config['tree_name'],
                                            self.config['input_file'],
                                            self.config['output_dir'],
                                            self.client,
                                            self.args.parallel)
+
         self.user_function_handler = LibraryFunctionHandler(self._load_analysis_library())
-        self.histogram_manager = HistogramManager(self.df_handler.output_dir)
+        self.histogram_manager = HistogramManager(self.df_manager.output_dir)
 
     def _load_analysis_library(self) -> Any:
         """
@@ -67,20 +68,23 @@ class DataFrameAnalyzer:
         histograms = []
 
         # Define new columns:
+        logger.info("Defining new columns...")
         for col in self.config.get('new_columns', []):
-            self.df_handler.define_new_column(col)
+            self.df_manager.define_new_column(col)
 
         # Apply user functions to define custom columns:
         for user_function in self.config.get('user_functions', []):
-            new_column_dict = self.user_function_handler.apply_library_function(user_function, self.df_handler.df)
-            self.df_handler.define_new_column(new_column_dict)
+            new_column_dict = self.user_function_handler.apply_library_function(user_function, self.df_manager.df)
+            self.df_manager.define_new_column(new_column_dict)
 
         # Apply cuts:
-        for i, selection in enumerate(self.config.get('cuts', []), start=1):
-            self.df_handler.apply_selection(selection, i)
+        logger.info("Applying cuts...")
+        for selection in self.config.get('cuts', []):
+            self.df_manager.apply_selection(selection)
 
         # Create histograms:
+        logger.info("Creating histograms...")
         for hist in self.config.get('hist_params', []):
-            histograms.append(self.histogram_manager.create_histogram(hist, self.df_handler.df))
+            histograms.append(self.histogram_manager.create_histogram(hist, self.df_manager.df))
 
         return histograms

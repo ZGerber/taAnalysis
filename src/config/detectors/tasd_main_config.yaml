@@ -1,0 +1,5 @@
+# tasd_main_config.yaml
+
+name: "tasd"
+detector_id: "TASD_MAIN"
+site_id:

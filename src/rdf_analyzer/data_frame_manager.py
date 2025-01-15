@@ -79,7 +79,7 @@ class DataFrameManager:
         # self.df.Display([f"{column_info['name']}"]).Print()
         return self
 
-    def apply_selection(self, selection: str, cut_num: int) -> 'DataFrameManager':
+    def apply_selection(self, selection: str) -> 'DataFrameManager':
         """
         Applies event selection to the RDataFrame using ROOT's filter.
 
@@ -87,9 +87,20 @@ class DataFrameManager:
         the condition. A cut number is also assigned to label the selection in the filtering process.
 
         :param selection: The filtering condition as a string expression.
-        :param cut_num: The cut number used to label the selection.
         :return: The DataFrameHandler instance, enabling method chaining.
         """
         logger.info(f"Applying selection: {selection}")
-        self.df = self.df.Filter(selection, f"Cut_{cut_num}")
+        self.df = self.df.Filter(selection, f"{selection}".ljust(30))
         return self
+
+    def save_df(self, output_dir: str) -> None:
+        """
+        Saves the DataFrame to a ROOT file in the specified output directory.
+
+        The DataFrame is saved as a TTree in a ROOT file with the name 'processed_tree.root'.
+
+        :param output_dir: The directory where the ROOT file will be saved.
+        """
+        output_file = f"{output_dir}/processed_tree.root"
+        logger.info(f"Saving DataFrame to {output_file}")
+        self.df.Snapshot(self.tree_name, output_file)

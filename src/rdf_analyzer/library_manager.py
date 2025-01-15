@@ -14,8 +14,8 @@ class LibraryFunctionHandler:
         Apply a user-defined function to the DataFrame to create a new column.
         """
         new_column = user_function['new_column']
-        func_call = user_function['callable']
-        func_args = user_function.get('args', [])
+        func_call  = user_function['callable']
+        func_args  = user_function.get('args', [])
         func_arg_list = [arg['value'] for arg in func_args]
 
         if not func_call:
@@ -35,7 +35,6 @@ class LibraryFunctionHandler:
             else:
                 logger.warning(f"No matching function call. Too many parameters. Column {new_column} not filled.")
                 new_column_info = None
-
 
         elif hasattr(self.user_class_instance, func_call):
             func = getattr(self.user_class_instance, func_call)
