@@ -68,23 +68,32 @@ class DataFrameAnalyzer:
         histograms = []
 
         # Define new columns:
-        logger.info("Defining new columns...")
-        for col in self.config.get('new_columns', []):
-            self.df_manager.define_new_column(col)
+        new_columns = self.config.get('new_columns', [])
+        if new_columns:
+            logger.info("Defining new columns...")
+            for col in new_columns:
+                self.df_manager.define_new_column(col)
 
         # Apply user functions to define custom columns:
-        for user_function in self.config.get('user_functions', []):
-            new_column_dict = self.user_function_handler.apply_library_function(user_function, self.df_manager.df)
-            self.df_manager.define_new_column(new_column_dict)
+        user_funcs = self.config.get('user_functions', [])
+        if user_funcs:
+            logger.info("Applying user-defined functions...")
+            for user_function in user_funcs:
+                new_column_dict = self.user_function_handler.apply_library_function(user_function, self.df_manager.df)
+                self.df_manager.define_new_column(new_column_dict)
 
         # Apply cuts:
-        logger.info("Applying cuts...")
-        for selection in self.config.get('cuts', []):
-            self.df_manager.apply_selection(selection)
+        cuts = self.config.get('cuts', [])
+        if cuts:
+            logger.info("Applying cuts...")
+            for cut in cuts:
+                self.df_manager.apply_selection(cut)
 
         # Create histograms:
-        logger.info("Creating histograms...")
-        for hist in self.config.get('hist_params', []):
-            histograms.append(self.histogram_manager.create_histogram(hist, self.df_manager.df))
+        histos = self.config.get('hist_params', [])
+        if histos:
+            logger.info("Creating histograms...")
+            for hist in histos:
+                histograms.append(self.histogram_manager.create_histogram(hist, self.df_manager.df))
 
         return histograms

@@ -8,3 +8,4 @@ txhybrid/
 build/
 taAnalysis.egg-info/
 processed_tree.npz
+cpp2ast.py
