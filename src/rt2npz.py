@@ -21,15 +21,21 @@ def parse_user_args():
                         type=str,
                         default=".",
                         help="Directory for output file(s). Default is ./")
+    parser.add_argument("-o", "--omit_columns",
+                        type=str,
+                        nargs="*",
+                        help="Names of the columns to omit, separated by spaces.")
     return parser.parse_args()
 
 
-def load_data(file_path, column_names, tree_name="taTree"):
+def load_data(file_path, column_names, omit_columns=None, tree_name="taTree"):
     """Load the data from the ROOT file using RDataFrame"""
     import dstpy
     rdf = dstpy.ROOT.RDataFrame(tree_name, file_path)
     if column_names:
         return rdf.AsNumpy(column_names)
+    if omit_columns:
+        return rdf.AsNumpy([col for col in rdf.GetColumnNames() if col not in omit_columns])
     return rdf.AsNumpy()
 
 
