@@ -21,7 +21,7 @@ def parse_user_args():
                         type=str,
                         default=".",
                         help="Directory for output file(s). Default is ./")
-    parser.add_argument("-o", "--omit_columns",
+    parser.add_argument("-x", "--omit_columns",
                         type=str,
                         nargs="*",
                         help="Names of the columns to omit, separated by spaces.")
