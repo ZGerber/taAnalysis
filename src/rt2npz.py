@@ -24,7 +24,7 @@ def parse_user_args():
     parser.add_argument("-x", "--omit_columns",
                         type=str,
                         nargs="*",
-                        help="Names of the columns to omit, separated by spaces.")
+                        help="Names of the columns to omit, separated by spaces. Overrides --column_names.")
     return parser.parse_args()
 
 
@@ -34,14 +34,14 @@ def load_data(file_path, column_names, omit_columns=None, tree_name="taTree"):
     rdf = dstpy.ROOT.RDataFrame(tree_name, file_path)
     if column_names:
         return rdf.AsNumpy(column_names)
-    if omit_columns:
-        return rdf.AsNumpy([col for col in rdf.GetColumnNames() if col not in omit_columns])
+    elif omit_columns:
+        return rdf.AsNumpy([str(col) for col in rdf.GetColumnNames() if col not in omit_columns])
     return rdf.AsNumpy()
 
 
 def main():
     args = parse_user_args()
-    data = load_data(args.file_path, args.column_names, args.tree_name)
+    data = load_data(args.file_path, args.column_names, args.omit_columns, args.tree_name)
     np.savez(f"{Path(args.file_path).stem}.npz", **data)
 
 
