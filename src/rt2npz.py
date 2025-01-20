@@ -39,9 +39,17 @@ def load_data(file_path, column_names, omit_columns=None, tree_name="taTree"):
     return rdf.AsNumpy()
 
 
+def convert_objects_to_np(data):
+    for key, value in data.items():
+        if data[key].dtype.kind == 'O':
+            for i, v in enumerate(value):
+                data[key][i] = np.array(list(v))
+
+
 def main():
     args = parse_user_args()
     data = load_data(args.file_path, args.column_names, args.omit_columns, args.tree_name)
+    convert_objects_to_np(data)
     np.savez(f"{Path(args.file_path).stem}.npz", **data)
 
 
