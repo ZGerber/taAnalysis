@@ -25,6 +25,9 @@ def parse_user_args():
                         type=str,
                         nargs="*",
                         help="Names of the columns to omit, separated by spaces. Overrides --column_names.")
+    parser.add_argument("--as_obj",
+                        action="store_true",
+                        help="Save the objects as they are instead of converting them to NumPy arrays.")
     return parser.parse_args()
 
 
@@ -49,7 +52,8 @@ def convert_objects_to_np(data):
 def main():
     args = parse_user_args()
     data = load_data(args.file_path, args.column_names, args.omit_columns, args.tree_name)
-    convert_objects_to_np(data)
+    if not args.as_obj:
+        convert_objects_to_np(data)
     np.savez(f"{Path(args.file_path).stem}.npz", **data)
 
 
