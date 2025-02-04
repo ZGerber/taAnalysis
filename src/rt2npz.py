@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 def parse_user_args():
-    """Parse the command-line arguments"""
+    """Parse the command-line arguments."""
     parser = argparse.ArgumentParser(description="Convert ROOT file to NumPy arrays. Only selected columns are converted.")
     parser.add_argument("file_path",
                         type=str,
@@ -32,21 +32,24 @@ def parse_user_args():
 
 
 def load_data(file_path, column_names, omit_columns=None, tree_name="taTree"):
-    """Load the data from the ROOT file using RDataFrame"""
+    """Load the data from the ROOT file using RDataFrame."""
     import dstpy
     rdf = dstpy.ROOT.RDataFrame(tree_name, file_path)
     if column_names:
         return rdf.AsNumpy(column_names)
     elif omit_columns:
-        return rdf.AsNumpy([str(col) for col in rdf.GetColumnNames() if col not in omit_columns])
+        all_columns = list(rdf.GetColumnNames())
+        selected_columns = [col for col in all_columns if col not in omit_columns]
+        return rdf.AsNumpy(selected_columns)
     return rdf.AsNumpy()
 
 
 def convert_objects_to_np(data):
+    """Convert ROOT objects to NumPy-compatible types."""
     for key, value in data.items():
-        if data[key].dtype.kind == 'O':
-            for i, v in enumerate(value):
-                data[key][i] = np.array(list(v))
+        if value.dtype.kind == 'O':  # Object or non-standard types
+            # Convert ROOT objects like std::vector to NumPy arrays
+            data[key] = np.array([np.array(list(v), dtype=np.float64) if hasattr(v, "__iter__") else v for v in value])
 
 
 def main():
@@ -54,7 +57,10 @@ def main():
     data = load_data(args.file_path, args.column_names, args.omit_columns, args.tree_name)
     if not args.as_obj:
         convert_objects_to_np(data)
-    np.savez(f"{Path(args.file_path).stem}.npz", **data)
+    # Save data to .npz
+    output_file = Path(args.output_dir) / f"{Path(args.file_path).stem}.npz"
+    np.savez(output_file, **data)
+    print(f"Data saved to {output_file}")
 
 
 if __name__ == "__main__":

@@ -139,3 +139,34 @@ class TASDCompositionFunctions:
                     return vem1;
                 }}
         """
+
+
+    @staticmethod
+    def extractPedestal0(pedestal: str) -> str:
+        """
+        """
+        return f"""
+                ROOT::RVec<double> extractPedestal0(const ROOT::RVec<std::vector<double>>& {pedestal}) {{
+                    ROOT::RVec<double> pedestal0;
+
+                    for (size_t i = 0; i < {pedestal}.size(); ++i) {{
+                        pedestal0.push_back({pedestal}[i][0]);
+                    }}
+                    return pedestal0;
+                }}
+        """
+
+    @staticmethod
+    def extractPedestal1(pedestal: str) -> str:
+        """
+        """
+        return f"""
+                ROOT::RVec<double> extractPedestal1(const ROOT::RVec<std::vector<double>>& {pedestal}) {{
+                    ROOT::RVec<double> pedestal1;
+
+                    for (size_t i = 0; i < {pedestal}.size(); ++i) {{
+                        pedestal1.push_back({pedestal}[i][1]);
+                    }}
+                    return pedestal1;
+                }}
+        """
