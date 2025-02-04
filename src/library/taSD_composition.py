@@ -170,3 +170,65 @@ class TASDCompositionFunctions:
                     return pedestal1;
                 }}
         """
+
+    @staticmethod
+    def extractMIP0(MIP: str) -> str:
+        """
+        """
+        return f"""
+                ROOT::RVec<double> extractMIP0(const ROOT::RVec<std::vector<double>>& {MIP}) {{
+                    ROOT::RVec<double> MIP0;
+
+                    for (size_t i = 0; i < {MIP}.size(); ++i) {{
+                        MIP0.push_back({MIP}[i][0]);
+                    }}
+                    return MIP0;
+                }}
+        """
+
+    @staticmethod
+    def extractMIP1(MIP: str) -> str:
+        """
+        """
+        return f"""
+                ROOT::RVec<double> extractMIP1(const ROOT::RVec<std::vector<double>>& {MIP}) {{
+                    ROOT::RVec<double> MIP1;
+
+                    for (size_t i = 0; i < {MIP}.size(); ++i) {{
+                        MIP1.push_back({MIP}[i][1]);
+                    }}
+                    return MIP1;
+                }}
+        """
+
+
+    @staticmethod
+    def extractPulseArea0(pulsearea: str) -> str:
+        """
+        """
+        return f"""
+                ROOT::RVec<double> extractPulseArea0(const ROOT::RVec<std::vector<double>>& {pulsearea}) {{
+                    ROOT::RVec<double> pulsearea0;
+
+                    for (size_t i = 0; i < {pulsearea}.size(); ++i) {{
+                        pulsearea0.push_back({pulsearea}[i][0]);
+                    }}
+                    return pulsearea0;
+                }}
+        """
+
+    @staticmethod
+    def extractPulseArea1(pulsearea: str) -> str:
+        """
+        """
+        return f"""
+                ROOT::RVec<double> extractPulseArea1(const ROOT::RVec<std::vector<double>>& {pulsearea}) {{
+                    ROOT::RVec<double> pulsearea1;
+
+                    for (size_t i = 0; i < {pulsearea}.size(); ++i) {{
+                        pulsearea1.push_back({pulsearea}[i][0]);
+                    }}
+                    return pulsearea1;
+                }}
+        """
+

@@ -5,7 +5,9 @@ description = "An easy-to-use interface for HEP data analysis using ROOT's RData
 requires-python = ">=3.8"
 dependencies = [
     "pyyaml",
-    "colorlog"
+    "colorlog",
+    "uproot",
+    "pyarrow"
 ]
 
 [build-system]

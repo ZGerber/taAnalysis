@@ -1,66 +1,63 @@
-import numpy as np
 import argparse
+import uproot
+import awkward as ak
 from pathlib import Path
 
 
-def parse_user_args():
-    """Parse the command-line arguments."""
-    parser = argparse.ArgumentParser(description="Convert ROOT file to NumPy arrays. Only selected columns are converted.")
-    parser.add_argument("file_path",
-                        type=str,
-                        help="Path to the ROOT file")
-    parser.add_argument("column_names",
-                        type=str,
-                        nargs="*",
-                        help="Names of the columns to create, separated by spaces. Default is all columns.")
-    parser.add_argument("--tree_name",
-                        type=str,
-                        default="taTree",
-                        help="Name of the TTree in the ROOT file. Default is 'taTree'.")
-    parser.add_argument("-o", "--output_dir",
-                        type=str,
-                        default=".",
-                        help="Directory for output file(s). Default is ./")
-    parser.add_argument("-x", "--omit_columns",
-                        type=str,
-                        nargs="*",
-                        help="Names of the columns to omit, separated by spaces. Overrides --column_names.")
-    parser.add_argument("--as_obj",
-                        action="store_true",
-                        help="Save the objects as they are instead of converting them to NumPy arrays.")
+def parse_args():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Convert ROOT file to Parquet with column selection.")
+    parser.add_argument("file_path", type=str, help="Path to the ROOT file")
+    parser.add_argument("column_names", type=str, nargs="*",
+                        help="Columns to convert (default: all)")
+    parser.add_argument("--tree_name", type=str, default="taTree",
+                        help="TTree name (default: 'taTree')")
+    parser.add_argument("-o", "--output_dir", type=str, default=".",
+                        help="Output directory (default: current)")
+    parser.add_argument("-x", "--omit_columns", type=str, nargs="*",
+                        help="Columns to exclude (overrides column_names)")
     return parser.parse_args()
 
 
-def load_data(file_path, column_names, omit_columns=None, tree_name="taTree"):
-    """Load the data from the ROOT file using RDataFrame."""
-    import dstpy
-    rdf = dstpy.ROOT.RDataFrame(tree_name, file_path)
-    if column_names:
-        return rdf.AsNumpy(column_names)
-    elif omit_columns:
-        all_columns = list(rdf.GetColumnNames())
-        selected_columns = [col for col in all_columns if col not in omit_columns]
-        return rdf.AsNumpy(selected_columns)
-    return rdf.AsNumpy()
+def get_columns(tree, args):
+    """Resolve column selection logic."""
+    all_columns = tree.keys()
+
+    if args.omit_columns:
+        return [col for col in all_columns if col not in args.omit_columns]
+    if args.column_names:
+        return [col for col in args.column_names if col in all_columns]
+    return all_columns
 
 
-def convert_objects_to_np(data):
-    """Convert ROOT objects to NumPy-compatible types."""
-    for key, value in data.items():
-        if value.dtype.kind == 'O':  # Object or non-standard types
-            # Convert ROOT objects like std::vector to NumPy arrays
-            data[key] = np.array([np.array(list(v), dtype=np.float64) if hasattr(v, "__iter__") else v for v in value])
+def save_parquet(data, input_path, output_dir):
+    """Save converted data to Parquet format."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    stem = Path(input_path).stem
+    output_path = output_dir / f"{stem}.parquet"
+
+    ak.to_parquet(data, output_path)
+    print(f"Saved converted data to: {output_path}")
 
 
 def main():
-    args = parse_user_args()
-    data = load_data(args.file_path, args.column_names, args.omit_columns, args.tree_name)
-    if not args.as_obj:
-        convert_objects_to_np(data)
-    # Save data to .npz
-    output_file = Path(args.output_dir) / f"{Path(args.file_path).stem}.npz"
-    np.savez(output_file, **data)
-    print(f"Data saved to {output_file}")
+    args = parse_args()
+
+    # Load ROOT data
+    with uproot.open(args.file_path) as file:
+        tree = file[args.tree_name]
+        columns = get_columns(tree, args)
+
+        if not columns:
+            raise ValueError("No valid columns selected for conversion")
+
+        data = tree.arrays(columns)
+
+    # Convert and save
+    save_parquet(data, args.file_path, args.output_dir)
 
 
 if __name__ == "__main__":
